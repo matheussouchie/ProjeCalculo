@@ -20,7 +20,9 @@ export function proxy(request: NextRequest) {
 
   const hasSupabaseSession = request.cookies
     .getAll()
-    .some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"));
+    .some(
+      (cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"),
+    );
 
   if (hasSupabaseSession) {
     return NextResponse.next();

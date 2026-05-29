@@ -3,15 +3,20 @@ export type ComplexityLevel = "low" | "medium" | "high";
 export type EnvironmentType =
   | "integrated"
   | "circulation"
+  | "living"
   | "bedroom"
+  | "suite"
   | "bathroom"
+  | "social_bathroom"
+  | "powder_room"
   | "kitchen"
   | "living_room"
   | "closet"
   | "laundry"
   | "balcony"
   | "office"
-  | "commercial";
+  | "commercial"
+  | "other";
 
 export type ProjectStatus = "estimating" | "in_progress" | "finished";
 

@@ -7,6 +7,8 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 1: `1.1` - fundacao Next.js, UI, Supabase e arquitetura base.
 - Sprint 2: `1.2` - modelagem relacional PostgreSQL/Supabase.
 - Sprint 3: `1.3` - autenticacao completa e app shell protegido.
+- Sprint 3.5: branding oficial com favicon, logo e icone.
+- Sprint 4: `1.4` - calculadora principal de prazo com cards interativos.
 
 ## Stack
 
@@ -53,6 +55,7 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/components`: UI componentizada e reutilizavel.
 - `src/components/app`: shell permanente, sidebar, header e estrutura protegida.
 - `src/components/auth`: formularios de login, cadastro e recuperacao de senha.
+- `src/components/calculator`: calculadora principal com cards, resumo e resultado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
 

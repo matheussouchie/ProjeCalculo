@@ -5,8 +5,12 @@ export const environmentSchema = z.object({
   type: z.enum([
     "integrated",
     "circulation",
+    "living",
     "bedroom",
+    "suite",
     "bathroom",
+    "social_bathroom",
+    "powder_room",
     "kitchen",
     "living_room",
     "closet",
@@ -14,6 +18,7 @@ export const environmentSchema = z.object({
     "balcony",
     "office",
     "commercial",
+    "other",
   ]),
   name: z.string().min(2, "Informe um nome para o ambiente."),
   squareMeters: z.coerce
