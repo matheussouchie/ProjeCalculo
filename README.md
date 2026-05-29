@@ -6,6 +6,7 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 
 - Sprint 1: `1.1` - fundacao Next.js, UI, Supabase e arquitetura base.
 - Sprint 2: `1.2` - modelagem relacional PostgreSQL/Supabase.
+- Sprint 3: `1.3` - autenticacao completa e app shell protegido.
 
 ## Stack
 
@@ -50,6 +51,8 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/types`: tipos centrais do dominio e do banco.
 - `src/app/actions`: Server Actions para calculo, persistencia e auth.
 - `src/components`: UI componentizada e reutilizavel.
+- `src/components/app`: shell permanente, sidebar, header e estrutura protegida.
+- `src/components/auth`: formularios de login, cadastro e recuperacao de senha.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
 
@@ -67,3 +70,11 @@ O trigger `handle_new_user` cria perfil, estatisticas e o primeiro historico aut
 - BWC Casal: 6.62 m2
 - BWC Filha: 6.53 m2
 - Total: 91.43 m2 em 11 dias corridos
+
+## Auth Sprint 3
+
+- `/login`: entrada com email e senha.
+- `/signup`: cadastro com nome, email e senha.
+- `/recover-password`: envio de email para recuperacao.
+- `/reset-password`: definicao de nova senha apos callback do Supabase.
+- `/dashboard`, `/calcular-prazo`, `/projetos`, `/estatisticas`, `/configuracoes`: rotas protegidas dentro do app shell.
