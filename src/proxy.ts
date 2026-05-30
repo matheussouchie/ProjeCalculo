@@ -4,6 +4,7 @@ const protectedRoutes = [
   "/dashboard",
   "/calcular-prazo",
   "/projetos",
+  "/registrar-projeto-concluido",
   "/estatisticas",
   "/configuracoes",
 ];
@@ -40,6 +41,7 @@ export const config = {
     "/dashboard/:path*",
     "/calcular-prazo/:path*",
     "/projetos/:path*",
+    "/registrar-projeto-concluido/:path*",
     "/estatisticas/:path*",
     "/configuracoes/:path*",
   ],

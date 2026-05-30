@@ -42,6 +42,10 @@ export const appNavigationItems: AppNavigationItem[] = [
 ];
 
 export function getNavigationTitle(pathname: string) {
+  if (pathname.startsWith("/registrar-projeto-concluido")) {
+    return "Registrar Projeto Concluído";
+  }
+
   return (
     appNavigationItems.find((item) => pathname.startsWith(item.href))?.title ??
     "Dashboard"

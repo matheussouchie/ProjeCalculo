@@ -10,6 +10,7 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 3.5: branding oficial com favicon, logo e icone.
 - Sprint 4: `1.4` - calculadora principal de prazo com cards interativos.
 - Sprint 5: `1.5` - motor de previsao isolado da UI.
+- Sprint 6: `1.6` - registro de projeto concluido para atualizar produtividade.
 
 ## Stack
 
@@ -57,6 +58,7 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/components/app`: shell permanente, sidebar, header e estrutura protegida.
 - `src/components/auth`: formularios de login, cadastro e recuperacao de senha.
 - `src/components/calculator`: calculadora principal com cards, resumo e resultado.
+- `src/components/completed-project`: fluxo para registrar entregas concluidas.
 - `src/lib/algorithm`: funcoes puras do motor matematico de previsao.
 - `src/services/prediction`: service de aplicacao usado pela UI e Server Actions.
 - `src/hooks`: hooks reutilizaveis de interface.
@@ -84,6 +86,7 @@ O trigger `handle_new_user` cria perfil, estatisticas e o primeiro historico aut
 - `/recover-password`: envio de email para recuperacao.
 - `/reset-password`: definicao de nova senha apos callback do Supabase.
 - `/dashboard`, `/calcular-prazo`, `/projetos`, `/estatisticas`, `/configuracoes`: rotas protegidas dentro do app shell.
+- `/registrar-projeto-concluido`: fluxo protegido para ensinar o sistema com projetos finalizados.
 
 ## Motor Sprint 5
 
@@ -103,3 +106,15 @@ Regras aplicadas:
 - fallback com produtividade inicial quando nao houver historico;
 - outliers extremos removidos antes de calcular produtividade historica;
 - pesos por ambiente mantidos em `src/lib/algorithm/weights.ts`.
+
+## Sprint 6
+
+O fluxo "Registrar Projeto Concluído" grava:
+
+- nome do projeto;
+- ambientes e metragens;
+- quantidade por ambiente;
+- dias corridos reais.
+
+Ao salvar, o projeto entra como concluído em `projects`, os ambientes entram em
+`project_rooms` e o trigger do Supabase recalcula `user_statistics`.

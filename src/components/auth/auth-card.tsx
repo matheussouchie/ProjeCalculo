@@ -38,10 +38,10 @@ export function AuthCard({
         priority
       />
       <div className="absolute inset-0 bg-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-background/70" />
+      <div className="absolute inset-0 bg-gradient-to-r from-white/35 via-white/10 to-background/70" />
 
       <section className="relative grid w-full max-w-5xl overflow-hidden rounded-lg border border-white/20 bg-card/95 shadow-[var(--shadow-soft)] backdrop-blur-xl md:grid-cols-[1fr_420px]">
-        <div className="hidden p-8 text-white md:flex md:flex-col md:justify-between">
+        <div className="hidden p-8 text-foreground md:flex md:flex-col md:justify-between">
           <div>
             <div className="mb-8 flex size-12 items-center justify-center rounded-md border border-white/25 bg-white/90 p-2 shadow-[var(--shadow-card)]">
               <Image
@@ -56,15 +56,15 @@ export function AuthCard({
             <Badge className="border-white/20 bg-white/90 text-foreground">
               ProjeCalculo
             </Badge>
-            <h1 className="mt-6 max-w-sm text-white">
+            <h1 className="mt-6 max-w-sm text-foreground">
               Prazos precisos para projetos de detalhamento.
             </h1>
-            <p className="mt-4 max-w-md text-sm leading-6 text-white/80">
+            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
               Uma base profissional para arquitetos, designers de interiores e
               projetistas acompanharem produtividade real.
             </p>
           </div>
-          <p className="text-xs text-white/70">ProjeCalculo · Auth seguro</p>
+          <p className="text-xs text-muted-foreground">ProjeCalculo · Auth seguro</p>
         </div>
 
         <Card className="rounded-none border-0 shadow-none">
