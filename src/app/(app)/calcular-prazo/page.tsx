@@ -1,5 +1,6 @@
 import { DeadlineCalculator } from "@/components/calculator/deadline-calculator";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { PredictionHistorySample } from "@/services/prediction";
 import { mapStatisticsToProductivityProfile } from "@/services/user-statistics.service";
 
 export default async function CalculateDeadlinePage() {
@@ -15,7 +16,25 @@ export default async function CalculateDeadlinePage() {
           .eq("user_id", user.id)
           .maybeSingle()
       : { data: null };
+  const { data: historicalProjects } =
+    supabase && user
+      ? await supabase
+          .from("projects")
+          .select("total_square_meters,actual_days,predicted_days,completed_at")
+          .eq("user_id", user.id)
+          .not("actual_days", "is", null)
+          .order("completed_at", { ascending: false })
+          .limit(40)
+      : { data: [] };
   const productivity = mapStatisticsToProductivityProfile(statistics);
+  const historicalSamples: PredictionHistorySample[] = (historicalProjects ?? [])
+    .filter((project) => project.actual_days !== null)
+    .map((project) => ({
+      totalSquareMeters: project.total_square_meters,
+      actualDays: project.actual_days ?? 0,
+      predictedDays: project.predicted_days,
+      completedAt: project.completed_at,
+    }));
 
   return (
     <section className="space-y-6">
@@ -27,7 +46,10 @@ export default async function CalculateDeadlinePage() {
         </p>
       </div>
 
-      <DeadlineCalculator productivity={productivity} />
+      <DeadlineCalculator
+        productivity={productivity}
+        historicalSamples={historicalSamples}
+      />
     </section>
   );
 }

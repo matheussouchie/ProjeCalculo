@@ -1,4 +1,5 @@
 import { INITIAL_PRODUCTIVITY_BASE } from "@/constants/initial-history";
+import type { HistoricalProductivitySample } from "@/lib/algorithm";
 import { environmentLabels } from "@/lib/project-options";
 import type { FinishProjectValues } from "@/lib/schemas";
 import { forecastProjectDays } from "@/lib/algorithm";
@@ -21,9 +22,11 @@ function buildInsights(environments: EnvironmentEstimate[], productivityUsed: nu
   return [
     `${environmentLabels[highestImpact.type]} concentra o maior impacto no prazo.`,
     `Produtividade considerada: ${roundToOneDecimal(productivityUsed)} m2 por dia.`,
-    "Outliers historicos extremos sao ignorados antes do calculo de produtividade.",
+    "Projetos recentes possuem maior peso e outliers extremos sao suavizados.",
   ];
 }
+
+export type PredictionHistorySample = HistoricalProductivitySample;
 
 export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEstimate {
   const forecast = forecastProjectDays({
@@ -33,6 +36,7 @@ export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEs
       squareMeters: environment.squareMeters,
     })),
     averageProductivity: input.productivity.averageSquareMetersPerDay,
+    historicalSamples: input.historicalSamples,
     fallbackProductivity: INITIAL_PRODUCTIVITY_BASE.averageSquareMetersPerDay,
   });
 

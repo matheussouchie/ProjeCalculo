@@ -9,6 +9,8 @@ export type AlgorithmRoom = {
 export type HistoricalProductivitySample = {
   totalSquareMeters: number;
   actualDays: number;
+  predictedDays?: number | null;
+  completedAt?: string | null;
 };
 
 export type ForecastRoom = AlgorithmRoom & {
@@ -28,6 +30,7 @@ export type ForecastResult = {
   totalSquareMeters: number;
   complexityTotal: number;
   productivityUsed: number;
+  averageErrorMargin: number;
   predictedDays: number;
   optimisticDays: number;
   conservativeDays: number;

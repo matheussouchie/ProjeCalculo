@@ -32,10 +32,11 @@ export async function estimateProjectAction(
     };
   }
 
-  const estimate = calculateProjectEstimate(parsed.data);
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
+    const estimate = calculateProjectEstimate(parsed.data);
+
     return {
       ok: true,
       estimate,
@@ -47,11 +48,32 @@ export async function estimateProjectAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
+    const estimate = calculateProjectEstimate(parsed.data);
+
     return {
       ok: true,
       estimate,
     };
   }
+
+  const { data: historicalProjects } = await supabase
+    .from("projects")
+    .select("total_square_meters,actual_days,predicted_days,completed_at")
+    .eq("user_id", user.id)
+    .not("actual_days", "is", null)
+    .order("completed_at", { ascending: false })
+    .limit(40);
+  const estimate = calculateProjectEstimate({
+    ...parsed.data,
+    historicalSamples: (historicalProjects ?? [])
+      .filter((project) => project.actual_days !== null)
+      .map((project) => ({
+        totalSquareMeters: project.total_square_meters,
+        actualDays: project.actual_days ?? 0,
+        predictedDays: project.predicted_days,
+        completedAt: project.completed_at,
+      })),
+  });
 
   const { data: project, error: projectError } = await supabase
     .from("projects")

@@ -11,6 +11,8 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 4: `1.4` - calculadora principal de prazo com cards interativos.
 - Sprint 5: `1.5` - motor de previsao isolado da UI.
 - Sprint 6: `1.6` - registro de projeto concluido para atualizar produtividade.
+- Sprint 6.5: metragem total editavel na calculadora com redistribuicao proporcional.
+- Sprint 7: `1.7` - aprendizado dinamico com peso maior para projetos recentes.
 
 ## Stack
 
@@ -61,6 +63,7 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/components/completed-project`: fluxo para registrar entregas concluidas.
 - `src/lib/algorithm`: funcoes puras do motor matematico de previsao.
 - `src/services/prediction`: service de aplicacao usado pela UI e Server Actions.
+- `src/services/project-area-adjustment.ts`: redistribui metragens para fechar um total informado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
 
@@ -106,6 +109,8 @@ Regras aplicadas:
 - fallback com produtividade inicial quando nao houver historico;
 - outliers extremos removidos antes de calcular produtividade historica;
 - pesos por ambiente mantidos em `src/lib/algorithm/weights.ts`.
+- media movel ponderada: projetos recentes representam 70% e antigos 30%;
+- normalizacao limita saltos bruscos de produtividade.
 
 ## Sprint 6
 

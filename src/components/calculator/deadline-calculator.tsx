@@ -19,15 +19,24 @@ import {
   type DeadlineCalculatorValues,
 } from "@/lib/calculator-schema";
 import { cn } from "@/lib/utils";
+import { redistributeRoomAreasToTotal } from "@/services/project-area-adjustment";
 import { calculateProjectEstimate } from "@/services/prediction";
+import type { PredictionHistorySample } from "@/services/prediction";
 import type { ProductivityProfile } from "@/types/project";
 
 type DeadlineCalculatorProps = {
   productivity: ProductivityProfile;
+  historicalSamples?: PredictionHistorySample[];
 };
 
-export function DeadlineCalculator({ productivity }: DeadlineCalculatorProps) {
+export function DeadlineCalculator({
+  productivity,
+  historicalSamples,
+}: DeadlineCalculatorProps) {
   const [showResult, setShowResult] = useState(false);
+  const [draftTotalSquareMeters, setDraftTotalSquareMeters] = useState<string | null>(
+    null,
+  );
   const roomIdCounter = useRef(0);
   const form = useForm<DeadlineCalculatorValues>({
     resolver: zodResolver(deadlineCalculatorSchema),
@@ -43,6 +52,14 @@ export function DeadlineCalculator({ productivity }: DeadlineCalculatorProps) {
   });
   const watchedRoomsValue = useWatch({ control: form.control, name: "rooms" });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
+  const currentTotalSquareMeters = watchedRooms.reduce(
+    (total, room) =>
+      total + Number(room.squareMeters || 0) * Number(room.quantity || 0),
+    0,
+  );
+
+  const totalInputValue =
+    draftTotalSquareMeters ?? currentTotalSquareMeters.toFixed(1);
 
   const estimateInput = useMemo(() => {
     const environments = watchedRooms
@@ -62,9 +79,10 @@ export function DeadlineCalculator({ productivity }: DeadlineCalculatorProps) {
     return {
       projectName: "Estimativa rapida",
       productivity,
+      historicalSamples,
       environments,
     };
-  }, [productivity, watchedRooms]);
+  }, [historicalSamples, productivity, watchedRooms]);
 
   const estimate = useMemo(() => {
     if (estimateInput.environments.length === 0) {
@@ -130,6 +148,28 @@ export function DeadlineCalculator({ productivity }: DeadlineCalculatorProps) {
       ...current,
       quantity: nextQuantity,
     });
+  }
+
+  function applyTotalSquareMeters() {
+    const targetTotal = Number(totalInputValue.replace(",", "."));
+
+    setDraftTotalSquareMeters(null);
+
+    if (
+      !Number.isFinite(targetTotal) ||
+      targetTotal <= 0 ||
+      watchedRooms.length === 0
+    ) {
+      return;
+    }
+
+    const adjustedRooms = redistributeRoomAreasToTotal(watchedRooms, targetTotal);
+    form.setValue("rooms", adjustedRooms, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+    setShowResult(false);
   }
 
   return (
@@ -297,10 +337,42 @@ export function DeadlineCalculator({ productivity }: DeadlineCalculatorProps) {
           </CardHeader>
           <CardContent className="space-y-5">
             <SideMetric label="Ambientes adicionados" value={String(totalRooms)} />
-            <SideMetric
-              label="Metragem total"
-              value={`${estimate?.totalSquareMeters ?? 0} m2`}
-            />
+            <div className="space-y-2 border-b pb-3">
+              <Label htmlFor="calculator-total-square-meters">Metragem total</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="calculator-total-square-meters"
+                  type="number"
+                  min={0}
+                  step="0.1"
+                  value={totalInputValue}
+                  onFocus={() =>
+                    setDraftTotalSquareMeters(currentTotalSquareMeters.toFixed(1))
+                  }
+                  onChange={(event) => {
+                    setDraftTotalSquareMeters(event.target.value);
+                  }}
+                  onBlur={applyTotalSquareMeters}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      applyTotalSquareMeters();
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={applyTotalSquareMeters}
+                  disabled={watchedRooms.length === 0}
+                >
+                  Ajustar
+                </Button>
+              </div>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Editar o total ajusta proporcionalmente as metragens dos ambientes.
+              </p>
+            </div>
             <SideMetric label="Complexidade total" value={totalComplexity.toFixed(1)} />
             <SideMetric
               label="Produtividade atual"

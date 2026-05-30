@@ -38,6 +38,12 @@ export type ProjectEstimateInput = {
   projectName: string;
   environments: ProjectEnvironment[];
   productivity: ProductivityProfile;
+  historicalSamples?: {
+    totalSquareMeters: number;
+    actualDays: number;
+    predictedDays?: number | null;
+    completedAt?: string | null;
+  }[];
 };
 
 export type EnvironmentEstimate = ProjectEnvironment & {

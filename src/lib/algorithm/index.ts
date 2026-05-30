@@ -1,5 +1,6 @@
 export { forecastProjectDays } from "@/lib/algorithm/forecast";
 export {
+  calculateAverageErrorMargin,
   calculateHistoricalProductivity,
   removeExtremeOutliers,
 } from "@/lib/algorithm/productivity";

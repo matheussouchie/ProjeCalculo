@@ -1,6 +1,9 @@
 import type { HistoricalProductivitySample } from "@/lib/algorithm/types";
 
 const MIN_PRODUCTIVITY = 1;
+const RECENT_WEIGHT = 0.7;
+const OLDER_WEIGHT = 0.3;
+const MAX_PRODUCTIVITY_SHIFT = 0.35;
 
 function getProductivity(sample: HistoricalProductivitySample) {
   if (sample.totalSquareMeters <= 0 || sample.actualDays <= 0) {
@@ -37,19 +40,80 @@ export function calculateHistoricalProductivity(
   samples: HistoricalProductivitySample[] | undefined,
   fallbackProductivity: number,
 ) {
+  const validSamples = (samples ?? [])
+    .map((sample, index) => ({
+      sample,
+      index,
+      productivity: getProductivity(sample),
+    }))
+    .filter(
+      (
+        entry,
+      ): entry is {
+        sample: HistoricalProductivitySample;
+        index: number;
+        productivity: number;
+      } => entry.productivity !== null,
+    )
+    .sort((left, right) => {
+      const leftDate = left.sample.completedAt
+        ? new Date(left.sample.completedAt).getTime()
+        : Number.MAX_SAFE_INTEGER - left.index;
+      const rightDate = right.sample.completedAt
+        ? new Date(right.sample.completedAt).getTime()
+        : Number.MAX_SAFE_INTEGER - right.index;
+
+      return rightDate - leftDate;
+    });
   const productivities = removeExtremeOutliers(
-    (samples ?? [])
-      .map(getProductivity)
-      .filter((value): value is number => value !== null),
+    validSamples.map((entry) => entry.productivity),
   );
 
   if (productivities.length === 0) {
     return Math.max(fallbackProductivity, MIN_PRODUCTIVITY);
   }
 
-  const total = productivities.reduce((sum, value) => sum + value, 0);
+  const recentLimit = Math.max(1, Math.ceil(productivities.length * 0.35));
+  const recent = productivities.slice(0, recentLimit);
+  const older = productivities.slice(recentLimit);
+  const recentAverage =
+    recent.reduce((sum, value) => sum + value, 0) / Math.max(recent.length, 1);
+  const olderAverage = older.length
+    ? older.reduce((sum, value) => sum + value, 0) / older.length
+    : recentAverage;
+  const weightedAverage = recentAverage * RECENT_WEIGHT + olderAverage * OLDER_WEIGHT;
+  const lowerLimit = fallbackProductivity * (1 - MAX_PRODUCTIVITY_SHIFT);
+  const upperLimit = fallbackProductivity * (1 + MAX_PRODUCTIVITY_SHIFT);
 
-  return Math.max(total / productivities.length, MIN_PRODUCTIVITY);
+  return Math.max(
+    Math.min(Math.max(weightedAverage, lowerLimit), upperLimit),
+    MIN_PRODUCTIVITY,
+  );
+}
+
+export function calculateAverageErrorMargin(
+  samples: HistoricalProductivitySample[] | undefined,
+) {
+  const margins = removeExtremeOutliers(
+    (samples ?? [])
+      .filter(
+        (sample) =>
+          sample.predictedDays !== null &&
+          sample.predictedDays !== undefined &&
+          sample.predictedDays > 0 &&
+          sample.actualDays > 0,
+      )
+      .map(
+        (sample) =>
+          Math.abs(sample.actualDays - sample.predictedDays!) / sample.predictedDays!,
+      ),
+  );
+
+  if (margins.length === 0) {
+    return 0.18;
+  }
+
+  return margins.reduce((sum, margin) => sum + margin, 0) / margins.length;
 }
 
 export function resolveProductivity({

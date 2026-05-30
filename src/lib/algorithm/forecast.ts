@@ -1,5 +1,8 @@
 import { getRoomWeight } from "@/lib/algorithm/weights";
-import { resolveProductivity } from "@/lib/algorithm/productivity";
+import {
+  calculateAverageErrorMargin,
+  resolveProductivity,
+} from "@/lib/algorithm/productivity";
 import { displayDays, smartRoundDays } from "@/lib/algorithm/rounding";
 import type { ForecastInput, ForecastResult } from "@/lib/algorithm/types";
 
@@ -10,12 +13,21 @@ function getConfidence(roomCount: number, hasHistoricalSamples: boolean) {
   return Math.min(base + scopeBonus, 94);
 }
 
+function clampForecast(days: number) {
+  if (!Number.isFinite(days)) {
+    return 1;
+  }
+
+  return Math.min(Math.max(days, 1), 365);
+}
+
 export function forecastProjectDays(input: ForecastInput): ForecastResult {
   const productivityUsed = resolveProductivity({
     averageProductivity: input.averageProductivity,
     historicalSamples: input.historicalSamples,
     fallbackProductivity: input.fallbackProductivity,
   });
+  const averageErrorMargin = calculateAverageErrorMargin(input.historicalSamples);
 
   const rooms = input.rooms.map((room) => {
     const weight = getRoomWeight(room.type);
@@ -33,16 +45,19 @@ export function forecastProjectDays(input: ForecastInput): ForecastResult {
     (total, room) => total + room.weightedSquareMeters,
     0,
   );
-  const predictedDays = smartRoundDays(complexityTotal / productivityUsed);
+  const rawPredictedDays = clampForecast(complexityTotal / productivityUsed);
+  const predictedDays = smartRoundDays(rawPredictedDays);
+  const marginRatio = Math.min(Math.max(averageErrorMargin, 0.12), 0.35);
 
   return {
     rooms,
     totalSquareMeters,
     complexityTotal,
     productivityUsed,
+    averageErrorMargin,
     predictedDays,
-    optimisticDays: displayDays(predictedDays * 0.9),
-    conservativeDays: displayDays(predictedDays * 1.18),
+    optimisticDays: displayDays(predictedDays * (1 - marginRatio * 0.65)),
+    conservativeDays: displayDays(predictedDays * (1 + marginRatio)),
     confidence: getConfidence(rooms.length, Boolean(input.historicalSamples?.length)),
   };
 }
