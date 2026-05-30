@@ -9,6 +9,7 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 3: `1.3` - autenticacao completa e app shell protegido.
 - Sprint 3.5: branding oficial com favicon, logo e icone.
 - Sprint 4: `1.4` - calculadora principal de prazo com cards interativos.
+- Sprint 5: `1.5` - motor de previsao isolado da UI.
 
 ## Stack
 
@@ -56,6 +57,8 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/components/app`: shell permanente, sidebar, header e estrutura protegida.
 - `src/components/auth`: formularios de login, cadastro e recuperacao de senha.
 - `src/components/calculator`: calculadora principal com cards, resumo e resultado.
+- `src/lib/algorithm`: funcoes puras do motor matematico de previsao.
+- `src/services/prediction`: service de aplicacao usado pela UI e Server Actions.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
 
@@ -81,3 +84,22 @@ O trigger `handle_new_user` cria perfil, estatisticas e o primeiro historico aut
 - `/recover-password`: envio de email para recuperacao.
 - `/reset-password`: definicao de nova senha apos callback do Supabase.
 - `/dashboard`, `/calcular-prazo`, `/projetos`, `/estatisticas`, `/configuracoes`: rotas protegidas dentro do app shell.
+
+## Motor Sprint 5
+
+A UI nao conhece a formula. Componentes chamam apenas `src/services/prediction`.
+
+Formula base:
+
+```text
+complexidade_total = soma(metragem_do_ambiente * peso_do_ambiente)
+dias_previstos = complexidade_total / produtividade_media
+```
+
+Regras aplicadas:
+
+- minimo de 1 dia;
+- arredondamento inteligente para prazos curtos;
+- fallback com produtividade inicial quando nao houver historico;
+- outliers extremos removidos antes de calcular produtividade historica;
+- pesos por ambiente mantidos em `src/lib/algorithm/weights.ts`.

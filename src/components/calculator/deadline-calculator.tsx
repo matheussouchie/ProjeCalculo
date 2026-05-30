@@ -19,7 +19,7 @@ import {
   type DeadlineCalculatorValues,
 } from "@/lib/calculator-schema";
 import { cn } from "@/lib/utils";
-import { calculateProjectEstimate } from "@/services/project-estimation.service";
+import { calculateProjectEstimate } from "@/services/prediction";
 import type { ProductivityProfile } from "@/types/project";
 
 type DeadlineCalculatorProps = {
@@ -55,7 +55,7 @@ export function DeadlineCalculator({ productivity }: DeadlineCalculatorProps) {
           type: room.type,
           name: option?.label ?? "Ambiente",
           squareMeters: Number(room.squareMeters) * Number(room.quantity),
-          complexity: option?.complexity ?? "medium",
+          complexity: "medium" as const,
         };
       });
 

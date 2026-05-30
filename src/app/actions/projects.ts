@@ -3,7 +3,7 @@
 import { projectEstimateSchema } from "@/lib/schemas";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ProjectEstimate } from "@/types/project";
-import { calculateProjectEstimate } from "@/services/project-estimation.service";
+import { calculateProjectEstimate } from "@/services/prediction";
 
 export type EstimateActionState = {
   ok: boolean;
