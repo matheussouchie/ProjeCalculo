@@ -58,8 +58,7 @@ export function DeadlineCalculator({
     0,
   );
 
-  const totalInputValue =
-    draftTotalSquareMeters ?? currentTotalSquareMeters.toFixed(1);
+  const totalInputValue = draftTotalSquareMeters ?? currentTotalSquareMeters.toFixed(1);
 
   const estimateInput = useMemo(() => {
     const environments = watchedRooms

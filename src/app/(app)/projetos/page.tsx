@@ -1,18 +1,21 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 
+import { ProjectHistoryList } from "@/components/analytics/project-history-list";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getCurrentUserAnalytics } from "@/services/analytics/user-analytics.queries";
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const { projects } = await getCurrentUserAnalytics();
+
   return (
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-3xl">
           <h2>Projetos</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Acompanhe projetos estimados e registre entregas concluídas para melhorar as
-            próximas previsões.
+            Consulte estimativas e entregas concluídas em um histórico simples, sem
+            tabelas pesadas.
           </p>
         </div>
         <Button asChild>
@@ -23,17 +26,7 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      <Card className="min-h-[360px] justify-center">
-        <CardHeader>
-          <CardTitle>Histórico em construção</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Use o registro de projeto concluído para alimentar a produtividade real. Nas
-            próximas sprints, esta área exibirá o histórico completo.
-          </p>
-        </CardContent>
-      </Card>
+      <ProjectHistoryList projects={projects} title="Histórico de projetos" />
     </section>
   );
 }

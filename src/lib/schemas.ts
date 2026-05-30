@@ -55,5 +55,14 @@ export const finishProjectSchema = z.object({
   completedProjects: z.coerce.number<number>().int().min(0),
 });
 
+export const profileSettingsSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Informe um nome com pelo menos 2 caracteres.")
+    .max(80, "Use um nome mais curto."),
+});
+
 export type ProjectEstimateFormValues = z.infer<typeof projectEstimateSchema>;
 export type FinishProjectValues = z.infer<typeof finishProjectSchema>;
+export type ProfileSettingsValues = z.infer<typeof profileSettingsSchema>;

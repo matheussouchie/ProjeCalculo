@@ -13,6 +13,7 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 6: `1.6` - registro de projeto concluido para atualizar produtividade.
 - Sprint 6.5: metragem total editavel na calculadora com redistribuicao proporcional.
 - Sprint 7: `1.7` - aprendizado dinamico com peso maior para projetos recentes.
+- Sprint 8: `1.8` - dashboard analitico, graficos, historico e configuracoes.
 
 ## Stack
 
@@ -20,6 +21,7 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - shadcn/ui como linguagem visual
 - React Hook Form e Zod para formularios
 - Framer Motion para microinteracoes
+- Recharts para visualizacoes analiticas
 - Supabase Auth e PostgreSQL
 - Prettier e ESLint para qualidade
 - Deploy preparado para Vercel
@@ -61,8 +63,11 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/components/auth`: formularios de login, cadastro e recuperacao de senha.
 - `src/components/calculator`: calculadora principal com cards, resumo e resultado.
 - `src/components/completed-project`: fluxo para registrar entregas concluidas.
+- `src/components/analytics`: cards, graficos, historico e empty/loading states.
+- `src/components/settings`: ajustes de perfil e workspace.
 - `src/lib/algorithm`: funcoes puras do motor matematico de previsao.
 - `src/services/prediction`: service de aplicacao usado pela UI e Server Actions.
+- `src/services/analytics`: leitura e preparacao das metricas analiticas.
 - `src/services/project-area-adjustment.ts`: redistribui metragens para fechar um total informado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
@@ -123,3 +128,17 @@ O fluxo "Registrar Projeto Concluído" grava:
 
 Ao salvar, o projeto entra como concluído em `projects`, os ambientes entram em
 `project_rooms` e o trigger do Supabase recalcula `user_statistics`.
+
+## Sprint 8
+
+O dashboard analitico exibe:
+
+- produtividade media;
+- precisao historica;
+- erro percentual medio;
+- tempo medio dos projetos;
+- evolucao da produtividade;
+- historico de projetos.
+
+As abas finais do SaaS permanecem enxutas: Dashboard, Calcular Prazo, Projetos,
+Estatisticas e Configuracoes.
