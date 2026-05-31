@@ -14,6 +14,7 @@ export type AnalyticsProject = Pick<
   | "actual_days"
   | "complexity_score"
   | "created_at"
+  | "updated_at"
   | "completed_at"
 >;
 

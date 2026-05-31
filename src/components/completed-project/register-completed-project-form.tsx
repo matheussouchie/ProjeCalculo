@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Loader2, Minus, Plus } from "lucide-react";
+import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import {
@@ -23,6 +23,7 @@ import {
   type CompletedProjectValues,
 } from "@/lib/completed-project-schema";
 import { cn } from "@/lib/utils";
+import { resolveRoomLabel } from "@/services/rooms/room-labels";
 
 const defaultValues: CompletedProjectValues = {
   name: "",
@@ -35,12 +36,13 @@ export function RegisterCompletedProjectForm() {
     ok: false,
   });
   const [isPending, startTransition] = useTransition();
+  const roomIdCounter = useRef(0);
   const form = useForm<CompletedProjectValues>({
     resolver: zodResolver(completedProjectSchema),
     defaultValues,
     mode: "onChange",
   });
-  const { fields, append, update, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "rooms",
     keyName: "fieldKey",
@@ -52,63 +54,35 @@ export function RegisterCompletedProjectForm() {
   });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
   const totalSquareMeters = watchedRooms.reduce(
-    (total, room) =>
-      total + Number(room.squareMeters || 0) * Number(room.quantity || 0),
+    (total, room) => total + Number(room.squareMeters || 0),
     0,
   );
 
   function addRoom(type: CalculatorRoomType) {
     const option = calculatorRoomOptions.find((room) => room.type === type);
-    const existingIndex = watchedRooms.findIndex((room) => room.type === type);
 
+    roomIdCounter.current += 1;
     setState({ ok: false });
-
-    if (existingIndex >= 0) {
-      const current = watchedRooms[existingIndex];
-      update(existingIndex, {
-        ...current,
-        quantity: Number(current.quantity) + 1,
-      });
-      return;
-    }
-
     append({
-      id: `${type}_${fields.length + 1}`,
+      id: `${type}_${roomIdCounter.current}`,
       type,
+      roomLabel: "",
       quantity: 1,
       squareMeters: option?.defaultSquareMeters ?? 10,
     });
   }
 
-  function decrementRoom(index: number) {
-    const current = watchedRooms[index];
-    const nextQuantity = Number(current.quantity) - 1;
-
-    setState({ ok: false });
-
-    if (nextQuantity <= 0) {
-      remove(index);
-      return;
-    }
-
-    update(index, {
-      ...current,
-      quantity: nextQuantity,
-    });
-  }
-
-  function incrementRoom(index: number) {
-    const current = watchedRooms[index];
-    update(index, {
-      ...current,
-      quantity: Number(current.quantity) + 1,
-    });
-    setState({ ok: false });
-  }
-
   function onSubmit(values: CompletedProjectValues) {
     startTransition(async () => {
-      const response = await registerCompletedProjectAction(values);
+      const normalizedValues = {
+        ...values,
+        rooms: values.rooms.map((room) => ({
+          ...room,
+          roomLabel: resolveRoomLabel(room, values.rooms),
+          quantity: 1,
+        })),
+      };
+      const response = await registerCompletedProjectAction(normalizedValues);
       setState(response);
 
       if (response.ok) {
@@ -166,39 +140,31 @@ export function RegisterCompletedProjectForm() {
           <CardHeader>
             <CardTitle>Ambientes entregues</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Toque nos ambientes, ajuste quantidade e metragem final.
+              Toque nos ambientes e informe a metragem individual de cada um.
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {calculatorRoomOptions.map((option) => {
-                const selected = watchedRooms.some((room) => room.type === option.type);
-
-                return (
-                  <button
-                    key={option.type}
-                    type="button"
-                    onClick={() => addRoom(option.type)}
-                    className={cn(
-                      "rounded-md border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      selected &&
-                        "border-foreground/30 bg-muted shadow-[var(--shadow-card)]",
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="font-medium">{option.label}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {option.description}
-                        </p>
-                      </div>
-                      <span className="flex size-8 items-center justify-center rounded-full border bg-card">
-                        <Plus className="size-4" aria-hidden="true" />
-                      </span>
+              {calculatorRoomOptions.map((option) => (
+                <button
+                  key={option.type}
+                  type="button"
+                  onClick={() => addRoom(option.type)}
+                  className="rounded-md border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{option.label}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {option.description}
+                      </p>
                     </div>
-                  </button>
-                );
-              })}
+                    <span className="flex size-8 items-center justify-center rounded-full border bg-card">
+                      <Plus className="size-4" aria-hidden="true" />
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
 
             <AnimatePresence initial={false}>
@@ -209,9 +175,13 @@ export function RegisterCompletedProjectForm() {
                   animate={{ opacity: 1 }}
                 >
                   {fields.map((field, index) => {
+                    const room = watchedRooms[index];
                     const option = calculatorRoomOptions.find(
-                      (room) => room.type === watchedRooms[index]?.type,
+                      (item) => item.type === room?.type,
                     );
+                    const fallbackLabel = room
+                      ? resolveRoomLabel(room, watchedRooms)
+                      : "Ambiente";
 
                     return (
                       <motion.article
@@ -224,7 +194,11 @@ export function RegisterCompletedProjectForm() {
                           type="hidden"
                           {...form.register(`rooms.${index}.type`)}
                         />
-                        <div className="grid gap-4 md:grid-cols-[1fr_170px_160px] md:items-end">
+                        <input
+                          type="hidden"
+                          {...form.register(`rooms.${index}.quantity`)}
+                        />
+                        <div className="grid gap-4 md:grid-cols-[1fr_1fr_160px_auto] md:items-end">
                           <div>
                             <p className="font-medium">{option?.label}</p>
                             <p className="mt-1 text-xs text-muted-foreground">
@@ -232,42 +206,36 @@ export function RegisterCompletedProjectForm() {
                             </p>
                           </div>
                           <div>
-                            <Label>Quantidade</Label>
-                            <div className="mt-2 flex h-10 items-center rounded-sm border bg-card">
-                              <button
-                                type="button"
-                                className="flex size-10 items-center justify-center text-muted-foreground hover:text-foreground"
-                                onClick={() => decrementRoom(index)}
-                                aria-label="Diminuir quantidade"
-                              >
-                                <Minus className="size-4" aria-hidden="true" />
-                              </button>
-                              <Input
-                                className="h-9 border-0 text-center shadow-none focus-visible:ring-0"
-                                type="number"
-                                min={1}
-                                {...form.register(`rooms.${index}.quantity`)}
-                              />
-                              <button
-                                type="button"
-                                className="flex size-10 items-center justify-center text-muted-foreground hover:text-foreground"
-                                onClick={() => incrementRoom(index)}
-                                aria-label="Aumentar quantidade"
-                              >
-                                <Plus className="size-4" aria-hidden="true" />
-                              </button>
-                            </div>
+                            <Label htmlFor={`room-label-${field.id}`}>
+                              Nome Ambiente
+                            </Label>
+                            <Input
+                              id={`room-label-${field.id}`}
+                              className="mt-2"
+                              placeholder={fallbackLabel}
+                              {...form.register(`rooms.${index}.roomLabel`)}
+                            />
                           </div>
                           <div>
-                            <Label>Metragem</Label>
+                            <Label htmlFor={`room-square-${field.id}`}>Metragem</Label>
                             <Input
+                              id={`room-square-${field.id}`}
                               className="mt-2"
                               type="number"
                               min={0}
-                              step="0.1"
+                              step="0.0001"
                               {...form.register(`rooms.${index}.squareMeters`)}
                             />
                           </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => remove(index)}
+                            aria-label="Remover ambiente"
+                          >
+                            <Trash2 aria-hidden="true" />
+                          </Button>
                         </div>
                       </motion.article>
                     );
@@ -307,7 +275,7 @@ export function RegisterCompletedProjectForm() {
             <SummaryLine label="Ambientes" value={String(watchedRooms.length)} />
             <SummaryLine
               label="Metragem total"
-              value={`${totalSquareMeters.toFixed(1)} m2`}
+              value={`${totalSquareMeters.toFixed(4)} m²`}
             />
             <SummaryLine label="Dias reais" value={`${watchedActualDays || 0} dias`} />
 

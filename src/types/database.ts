@@ -46,6 +46,7 @@ export type Database = {
           actual_days: number | null;
           complexity_score: number;
           created_at: string;
+          updated_at: string;
           completed_at: string | null;
         };
         Insert: {
@@ -57,6 +58,7 @@ export type Database = {
           actual_days?: number | null;
           complexity_score?: number;
           created_at?: string;
+          updated_at?: string;
           completed_at?: string | null;
         };
         Update: {
@@ -65,6 +67,7 @@ export type Database = {
           predicted_days?: number;
           actual_days?: number | null;
           complexity_score?: number;
+          updated_at?: string;
           completed_at?: string | null;
         };
         Relationships: [
@@ -82,6 +85,7 @@ export type Database = {
           id: string;
           project_id: string;
           room_type: string;
+          room_label: string;
           quantity: number;
           square_meters: number;
           weight_used: number;
@@ -91,6 +95,7 @@ export type Database = {
           id?: string;
           project_id: string;
           room_type: string;
+          room_label: string;
           quantity?: number;
           square_meters: number;
           weight_used?: number;
@@ -98,6 +103,7 @@ export type Database = {
         };
         Update: {
           room_type?: string;
+          room_label?: string;
           quantity?: number;
           square_meters?: number;
           weight_used?: number;

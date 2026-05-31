@@ -8,7 +8,7 @@ import type {
   ProjectEstimate,
   ProjectEstimateInput,
 } from "@/types/project";
-import { roundToOneDecimal } from "@/utils/number";
+import { roundToFourDecimals, roundToOneDecimal } from "@/utils/number";
 
 function buildInsights(environments: EnvironmentEstimate[], productivityUsed: number) {
   const highestImpact = [...environments].sort(
@@ -50,19 +50,20 @@ export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEs
       id: room.id,
       type: room.type,
       name: original?.name ?? environmentLabels[room.type],
-      squareMeters: room.squareMeters,
+      roomLabel: original?.roomLabel,
+      squareMeters: roundToFourDecimals(room.squareMeters),
       complexity: original?.complexity ?? "medium",
       complexityMultiplier: 1,
       weight: room.weight,
-      weightedSquareMeters: roundToOneDecimal(room.weightedSquareMeters),
+      weightedSquareMeters: roundToFourDecimals(room.weightedSquareMeters),
       estimatedDays: roundToOneDecimal(estimatedDays),
     };
   });
 
   return {
     projectName: input.projectName,
-    totalSquareMeters: roundToOneDecimal(forecast.totalSquareMeters),
-    weightedSquareMeters: roundToOneDecimal(forecast.complexityTotal),
+    totalSquareMeters: roundToFourDecimals(forecast.totalSquareMeters),
+    weightedSquareMeters: roundToFourDecimals(forecast.complexityTotal),
     baseDays: roundToOneDecimal(forecast.complexityTotal / forecast.productivityUsed),
     confidence: forecast.confidence,
     recommendedDays: forecast.predictedDays,

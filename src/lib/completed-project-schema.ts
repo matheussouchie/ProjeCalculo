@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+const squareMetersSchema = z.coerce
+  .number<number>()
+  .positive()
+  .max(500)
+  .refine((value) => Number.isInteger(value * 10000), {
+    message: "Use no máximo 4 casas decimais.",
+  });
+
 export const completedProjectRoomSchema = z.object({
   id: z.string().min(1),
   type: z.enum([
@@ -15,8 +23,9 @@ export const completedProjectRoomSchema = z.object({
     "circulation",
     "other",
   ]),
-  quantity: z.coerce.number<number>().int().min(1).max(20),
-  squareMeters: z.coerce.number<number>().positive().max(500),
+  roomLabel: z.string().trim().max(80).optional(),
+  quantity: z.coerce.number<number>().int().min(1).max(1),
+  squareMeters: squareMetersSchema,
 });
 
 export const completedProjectSchema = z.object({

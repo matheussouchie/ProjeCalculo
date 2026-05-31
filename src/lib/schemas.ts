@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+const preciseSquareMetersSchema = z.coerce
+  .number<number>()
+  .positive("A metragem deve ser maior que zero.")
+  .max(500, "Revise a metragem informada.")
+  .refine((value) => Number.isInteger(value * 10000), {
+    message: "Use no máximo 4 casas decimais.",
+  });
+
 export const environmentSchema = z.object({
   id: z.string().min(1),
   type: z.enum([
@@ -21,18 +29,13 @@ export const environmentSchema = z.object({
     "other",
   ]),
   name: z.string().min(2, "Informe um nome para o ambiente."),
-  squareMeters: z.coerce
-    .number<number>()
-    .positive("A metragem deve ser maior que zero.")
-    .max(500, "Revise a metragem informada."),
+  roomLabel: z.string().trim().max(80).optional(),
+  squareMeters: preciseSquareMetersSchema,
   complexity: z.enum(["low", "medium", "high"]),
 });
 
 export const projectEstimateSchema = z.object({
-  projectName: z
-    .string()
-    .min(2, "Informe o nome do projeto.")
-    .max(80, "Use um nome mais curto."),
+  projectName: z.string().trim().max(80, "Use um nome mais curto."),
   environments: z
     .array(environmentSchema)
     .min(1, "Adicione ao menos um ambiente.")

@@ -24,6 +24,7 @@ export type ProjectEnvironment = {
   id: string;
   type: EnvironmentType;
   name: string;
+  roomLabel?: string;
   squareMeters: number;
   complexity: ComplexityLevel;
 };

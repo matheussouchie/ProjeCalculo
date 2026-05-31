@@ -1,6 +1,6 @@
 type AdjustableRoom = {
-  quantity: number;
   squareMeters: number;
+  quantity?: number;
 };
 
 export function redistributeRoomAreasToTotal<TRoom extends AdjustableRoom>(
@@ -12,17 +12,17 @@ export function redistributeRoomAreasToTotal<TRoom extends AdjustableRoom>(
   }
 
   const currentTotal = rooms.reduce(
-    (total, room) => total + room.squareMeters * room.quantity,
+    (total, room) => total + room.squareMeters * (room.quantity ?? 1),
     0,
   );
-  const totalQuantity = rooms.reduce((total, room) => total + room.quantity, 0);
+  const totalQuantity = rooms.reduce((total, room) => total + (room.quantity ?? 1), 0);
 
   if (currentTotal <= 0) {
     const squareMetersPerUnit = targetTotalSquareMeters / Math.max(totalQuantity, 1);
 
     return rooms.map((room) => ({
       ...room,
-      squareMeters: Number(squareMetersPerUnit.toFixed(2)),
+      squareMeters: Number(squareMetersPerUnit.toFixed(4)),
     }));
   }
 
@@ -30,6 +30,6 @@ export function redistributeRoomAreasToTotal<TRoom extends AdjustableRoom>(
 
   return rooms.map((room) => ({
     ...room,
-    squareMeters: Number((room.squareMeters * ratio).toFixed(2)),
+    squareMeters: Number((room.squareMeters * ratio).toFixed(4)),
   }));
 }

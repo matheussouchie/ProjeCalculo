@@ -1,5 +1,6 @@
 import { DeadlineCalculator } from "@/components/calculator/deadline-calculator";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUserSavedEstimates } from "@/services/estimates/saved-estimates.queries";
 import type { PredictionHistorySample } from "@/services/prediction";
 import { mapStatisticsToProductivityProfile } from "@/services/user-statistics.service";
 
@@ -35,20 +36,22 @@ export default async function CalculateDeadlinePage() {
       predictedDays: project.predicted_days,
       completedAt: project.completed_at,
     }));
+  const savedEstimates = await getCurrentUserSavedEstimates();
 
   return (
     <section className="space-y-6">
       <div className="max-w-3xl">
         <h2>Calculadora de prazo</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Adicione ambientes, ajuste quantidades e metragem. O ProjeCalculo recalcula a
-          previsão automaticamente.
+          Crie, salve e gerencie estimativas com ambientes individualizados e metragem
+          de até 4 casas decimais.
         </p>
       </div>
 
       <DeadlineCalculator
         productivity={productivity}
         historicalSamples={historicalSamples}
+        savedEstimates={savedEstimates}
       />
     </section>
   );

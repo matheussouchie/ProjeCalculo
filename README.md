@@ -14,6 +14,8 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 6.5: metragem total editavel na calculadora com redistribuicao proporcional.
 - Sprint 7: `1.7` - aprendizado dinamico com peso maior para projetos recentes.
 - Sprint 8: `1.8` - dashboard analitico, graficos, historico e configuracoes.
+- Sprint 9: `1.9` - ambientes individualizados e metragens com 4 casas decimais.
+- Sprint 10: `1.10` - gerenciador de estimativas salvas.
 
 ## Stack
 
@@ -68,6 +70,8 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/lib/algorithm`: funcoes puras do motor matematico de previsao.
 - `src/services/prediction`: service de aplicacao usado pela UI e Server Actions.
 - `src/services/analytics`: leitura e preparacao das metricas analiticas.
+- `src/services/estimates`: leitura e mapeamento de estimativas salvas.
+- `src/services/rooms`: geracao de nomes de ambientes individualizados.
 - `src/services/project-area-adjustment.ts`: redistribui metragens para fechar um total informado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
@@ -142,3 +146,16 @@ O dashboard analitico exibe:
 
 As abas finais do SaaS permanecem enxutas: Dashboard, Calcular Prazo, Projetos,
 Estatisticas e Configuracoes.
+
+## Sprint 9 e Sprint 10
+
+A migration `supabase/migrations/0002_room_instances_and_saved_estimates.sql`
+deve ser executada manualmente no Supabase SQL Editor.
+
+- `project_rooms.room_label` representa o nome individual do ambiente.
+- `projects.total_square_meters`, `projects.complexity_score` e
+  `project_rooms.square_meters` passam a aceitar 4 casas decimais.
+- `projects.updated_at` permite listar estimativas por ultima alteracao.
+- Estimativas salvas usam `projects.actual_days is null`.
+- O usuario pode salvar, editar, duplicar e excluir estimativas em
+  `/calcular-prazo`.
