@@ -18,6 +18,7 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 10: `1.10` - gerenciador de estimativas salvas.
 - Sprint 11: `1.11` - catalogo de ambientes por usuario com pesos personalizados.
 - Sprint 12: `1.12` - preferencias, tema persistido e sessao nao persistente.
+- Sprint 13: `1.13` - autosave global, rascunhos recuperaveis e notificacoes.
 
 ## Stack
 
@@ -76,6 +77,7 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/services/rooms`: geracao de nomes de ambientes individualizados.
 - `src/services/user-rooms`: catalogo de ambientes por usuario.
 - `src/services/user-preferences`: preferencias persistidas do usuario.
+- `src/services/drafts`: leitura e mapeamento dos rascunhos de autosave.
 - `src/services/project-area-adjustment.ts`: redistribui metragens para fechar um total informado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
@@ -176,3 +178,16 @@ pesos personalizados no algoritmo.
 
 Sprint 12 cria `user_preferences`, persiste tema claro/escuro, adiciona toggle
 Sol/Lua no header e configura a sessao para nao persistir no navegador.
+
+## Sprint 13
+
+A migration `supabase/migrations/0005_drafts_autosave.sql` deve ser executada
+manualmente no Supabase SQL Editor.
+
+- `drafts`: rascunhos por usuario, tela e entidade.
+- Autosave local imediato com sincronizacao no Supabase apos 3 segundos sem
+  digitacao.
+- Recuperacao de rascunho em `/calcular-prazo` e
+  `/registrar-projeto-concluido`.
+- Aviso offline e notificacoes padronizadas por tom: sucesso, erro, aviso e
+  informacao.

@@ -12,6 +12,7 @@ import {
   type SavedEstimateActionState,
 } from "@/app/actions/projects";
 import { SavedEstimatesList } from "@/components/calculator/saved-estimates-list";
+import { NotificationBanner } from "@/components/feedback/notification-banner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,8 @@ import {
   type DeadlineCalculatorValues,
 } from "@/lib/calculator-schema";
 import { cn } from "@/lib/utils";
+import { notificationMessages } from "@/constants/notifications";
+import { useAutosaveDraft } from "@/hooks/use-autosave-draft";
 import {
   mapEstimateToCalculatorValues,
   type SavedEstimate,
@@ -34,12 +37,14 @@ import { calculateProjectEstimate } from "@/services/prediction";
 import type { PredictionHistorySample } from "@/services/prediction";
 import { resolveRoomLabel } from "@/services/rooms/room-labels";
 import type { ProductivityProfile } from "@/types/project";
+import type { DraftRecord } from "@/types/draft";
 
 type DeadlineCalculatorProps = {
   productivity: ProductivityProfile;
   historicalSamples?: PredictionHistorySample[];
   savedEstimates: SavedEstimate[];
   roomOptions: CalculatorRoomOption[];
+  draft: DraftRecord<DeadlineCalculatorValues> | null;
 };
 
 const defaultValues: DeadlineCalculatorValues = {
@@ -52,6 +57,7 @@ export function DeadlineCalculator({
   historicalSamples,
   savedEstimates,
   roomOptions,
+  draft,
 }: DeadlineCalculatorProps) {
   const router = useRouter();
   const [showResult, setShowResult] = useState(false);
@@ -79,6 +85,29 @@ export function DeadlineCalculator({
   });
   const watchedRoomsValue = useWatch({ control: form.control, name: "rooms" });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
+  const watchedValues = useWatch({ control: form.control });
+  const autosaveValues = useMemo(
+    () =>
+      ({
+        projectId: watchedValues.projectId,
+        projectName: watchedValues.projectName ?? "",
+        rooms: (watchedValues.rooms ?? []) as DeadlineCalculatorValues["rooms"],
+      }) satisfies DeadlineCalculatorValues,
+    [watchedValues.projectId, watchedValues.projectName, watchedValues.rooms],
+  );
+  const autosave = useAutosaveDraft({
+    scope: "calculate_deadline",
+    entityId: autosaveValues.projectId ?? null,
+    values: autosaveValues,
+    serverDraft: draft,
+    isMeaningful: (values) =>
+      Boolean(values.projectName?.trim()) || (values.rooms?.length ?? 0) > 0,
+    onRestore: (values) => {
+      form.reset(values);
+      setShowResult(false);
+      setShowSaveDialog(false);
+    },
+  });
   const currentTotalSquareMeters = watchedRooms.reduce(
     (total, room) => total + Number(room.squareMeters || 0),
     0,
@@ -180,6 +209,7 @@ export function DeadlineCalculator({
         }
 
         setShowSaveDialog(false);
+        autosave.clearDraft();
         router.refresh();
       }
     });
@@ -195,6 +225,35 @@ export function DeadlineCalculator({
 
   return (
     <div ref={calculatorRef} className="space-y-6">
+      {autosave.hasPendingDraft ? (
+        <NotificationBanner
+          tone="info"
+          message={notificationMessages.draftFound}
+          actions={
+            <>
+              <Button type="button" size="sm" onClick={autosave.restoreDraft}>
+                Restaurar
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={autosave.discardDraft}
+              >
+                Descartar
+              </Button>
+            </>
+          }
+        />
+      ) : null}
+
+      {autosave.notification ? (
+        <NotificationBanner
+          tone={autosave.notification.tone}
+          message={autosave.notification.message}
+        />
+      ) : null}
+
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
           <Card>

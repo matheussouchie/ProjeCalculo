@@ -10,6 +10,7 @@ import {
   registerCompletedProjectAction,
   type CompletedProjectActionState,
 } from "@/app/actions/projects";
+import { NotificationBanner } from "@/components/feedback/notification-banner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,12 +19,15 @@ import type {
   CalculatorRoomOption,
   CalculatorRoomType,
 } from "@/constants/calculator-rooms";
+import { notificationMessages } from "@/constants/notifications";
+import { useAutosaveDraft } from "@/hooks/use-autosave-draft";
 import {
   completedProjectSchema,
   type CompletedProjectValues,
 } from "@/lib/completed-project-schema";
 import { cn } from "@/lib/utils";
 import { resolveRoomLabel } from "@/services/rooms/room-labels";
+import type { DraftRecord } from "@/types/draft";
 
 const defaultValues: CompletedProjectValues = {
   name: "",
@@ -33,8 +37,10 @@ const defaultValues: CompletedProjectValues = {
 
 export function RegisterCompletedProjectForm({
   roomOptions,
+  draft,
 }: {
   roomOptions: CalculatorRoomOption[];
+  draft: DraftRecord<CompletedProjectValues> | null;
 }) {
   const [state, setState] = useState<CompletedProjectActionState>({
     ok: false,
@@ -57,6 +63,26 @@ export function RegisterCompletedProjectForm({
     name: "actualDays",
   });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
+  const watchedValues = useWatch({ control: form.control });
+  const autosaveValues = useMemo(
+    () =>
+      ({
+        name: watchedValues.name ?? "",
+        actualDays: watchedValues.actualDays ?? 1,
+        rooms: (watchedValues.rooms ?? []) as CompletedProjectValues["rooms"],
+      }) satisfies CompletedProjectValues,
+    [watchedValues.actualDays, watchedValues.name, watchedValues.rooms],
+  );
+  const autosave = useAutosaveDraft({
+    scope: "completed_project",
+    values: autosaveValues,
+    serverDraft: draft,
+    isMeaningful: (values) =>
+      Boolean(values.name?.trim()) || (values.rooms?.length ?? 0) > 0,
+    onRestore: (values) => {
+      form.reset(values);
+    },
+  });
   const totalSquareMeters = watchedRooms.reduce(
     (total, room) => total + Number(room.squareMeters || 0),
     0,
@@ -91,6 +117,7 @@ export function RegisterCompletedProjectForm({
       setState(response);
 
       if (response.ok) {
+        autosave.clearDraft();
         form.reset(defaultValues);
       }
     });
@@ -102,6 +129,35 @@ export function RegisterCompletedProjectForm({
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <div className="space-y-6">
+        {autosave.hasPendingDraft ? (
+          <NotificationBanner
+            tone="info"
+            message={notificationMessages.draftFound}
+            actions={
+              <>
+                <Button type="button" size="sm" onClick={autosave.restoreDraft}>
+                  Restaurar
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={autosave.discardDraft}
+                >
+                  Descartar
+                </Button>
+              </>
+            }
+          />
+        ) : null}
+
+        {autosave.notification ? (
+          <NotificationBanner
+            tone={autosave.notification.tone}
+            message={autosave.notification.message}
+          />
+        ) : null}
+
         <Card>
           <CardHeader>
             <CardTitle>Dados do projeto</CardTitle>

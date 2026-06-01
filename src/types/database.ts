@@ -36,6 +36,41 @@ export type Database = {
           },
         ];
       };
+      drafts: {
+        Row: {
+          id: string;
+          user_id: string;
+          scope: string;
+          entity_id: string | null;
+          payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          scope: string;
+          entity_id?: string | null;
+          payload?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          scope?: string;
+          entity_id?: string | null;
+          payload?: Json;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "drafts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       projects: {
         Row: {
           id: string;

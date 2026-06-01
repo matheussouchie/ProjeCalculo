@@ -6,6 +6,7 @@ import {
   deadlineCalculatorSchema,
   type DeadlineCalculatorValues,
 } from "@/lib/calculator-schema";
+import { notificationMessages } from "@/constants/notifications";
 import { completedProjectSchema } from "@/lib/completed-project-schema";
 import { projectEstimateSchema } from "@/lib/schemas";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -231,7 +232,7 @@ export async function estimateProjectAction(
   if (projectError) {
     return {
       ok: false,
-      error: "Nao foi possivel salvar o projeto estimado.",
+      error: notificationMessages.saveError,
       estimate,
     };
   }
@@ -251,7 +252,7 @@ export async function estimateProjectAction(
   if (roomsError) {
     return {
       ok: false,
-      error: "Projeto salvo, mas houve falha ao salvar os ambientes.",
+      error: notificationMessages.saveError,
       estimate,
     };
   }
@@ -329,7 +330,7 @@ export async function registerCompletedProjectAction(
   if (projectError) {
     return {
       ok: false,
-      message: "Nao foi possivel registrar o projeto concluido.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -354,7 +355,7 @@ export async function registerCompletedProjectAction(
   if (roomsError) {
     return {
       ok: false,
-      message: "Projeto salvo, mas houve falha ao registrar os ambientes.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -365,7 +366,7 @@ export async function registerCompletedProjectAction(
 
   return {
     ok: true,
-    message: "Projeto concluido registrado. As estatisticas foram atualizadas.",
+    message: notificationMessages.saved,
   };
 }
 
@@ -457,7 +458,7 @@ export async function saveEstimateAction(
   if (projectResponse.error) {
     return {
       ok: false,
-      message: "Não foi possível salvar esta estimativa.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -470,7 +471,7 @@ export async function saveEstimateAction(
     if (deleteRoomsError) {
       return {
         ok: false,
-        message: "Estimativa atualizada, mas houve falha ao renovar ambientes.",
+        message: notificationMessages.saveError,
       };
     }
   }
@@ -495,7 +496,7 @@ export async function saveEstimateAction(
   if (roomsError) {
     return {
       ok: false,
-      message: "Estimativa salva, mas houve falha ao salvar os ambientes.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -507,8 +508,8 @@ export async function saveEstimateAction(
     ok: true,
     estimateId: projectResponse.data.id,
     message: parsed.data.projectId
-      ? "Estimativa atualizada com sucesso."
-      : "Estimativa salva com sucesso.",
+      ? notificationMessages.updated
+      : notificationMessages.saved,
   };
 }
 
@@ -545,7 +546,7 @@ export async function deleteEstimateAction(
   if (error) {
     return {
       ok: false,
-      message: "Não foi possível excluir esta estimativa.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -555,7 +556,7 @@ export async function deleteEstimateAction(
 
   return {
     ok: true,
-    message: "Estimativa excluída.",
+    message: notificationMessages.deleted,
   };
 }
 
@@ -616,7 +617,7 @@ export async function duplicateEstimateAction(
   if (duplicateProjectError) {
     return {
       ok: false,
-      message: "Não foi possível duplicar esta estimativa.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -636,7 +637,7 @@ export async function duplicateEstimateAction(
   if (roomsError) {
     return {
       ok: false,
-      message: "Estimativa duplicada, mas houve falha nos ambientes.",
+      message: notificationMessages.saveError,
     };
   }
 
@@ -647,6 +648,6 @@ export async function duplicateEstimateAction(
   return {
     ok: true,
     estimateId: duplicatedProject.id,
-    message: "Estimativa duplicada.",
+    message: notificationMessages.saved,
   };
 }

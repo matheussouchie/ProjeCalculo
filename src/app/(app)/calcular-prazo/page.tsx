@@ -1,5 +1,7 @@
 import { DeadlineCalculator } from "@/components/calculator/deadline-calculator";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { DeadlineCalculatorValues } from "@/lib/calculator-schema";
+import { getCurrentUserDraft } from "@/services/drafts/drafts.queries";
 import { getCurrentUserSavedEstimates } from "@/services/estimates/saved-estimates.queries";
 import type { PredictionHistorySample } from "@/services/prediction";
 import { getCurrentUserActiveRoomOptions } from "@/services/user-rooms/user-rooms.queries";
@@ -39,6 +41,8 @@ export default async function CalculateDeadlinePage() {
     }));
   const savedEstimates = await getCurrentUserSavedEstimates();
   const roomOptions = await getCurrentUserActiveRoomOptions();
+  const draft =
+    await getCurrentUserDraft<DeadlineCalculatorValues>("calculate_deadline");
 
   return (
     <section className="space-y-6">
@@ -55,6 +59,7 @@ export default async function CalculateDeadlinePage() {
         historicalSamples={historicalSamples}
         savedEstimates={savedEstimates}
         roomOptions={roomOptions}
+        draft={draft}
       />
     </section>
   );

@@ -1,8 +1,11 @@
 import { RegisterCompletedProjectForm } from "@/components/completed-project/register-completed-project-form";
+import type { CompletedProjectValues } from "@/lib/completed-project-schema";
+import { getCurrentUserDraft } from "@/services/drafts/drafts.queries";
 import { getCurrentUserActiveRoomOptions } from "@/services/user-rooms/user-rooms.queries";
 
 export default async function RegisterCompletedProjectPage() {
   const roomOptions = await getCurrentUserActiveRoomOptions();
+  const draft = await getCurrentUserDraft<CompletedProjectValues>("completed_project");
 
   return (
     <section className="space-y-6">
@@ -14,7 +17,7 @@ export default async function RegisterCompletedProjectPage() {
         </p>
       </div>
 
-      <RegisterCompletedProjectForm roomOptions={roomOptions} />
+      <RegisterCompletedProjectForm roomOptions={roomOptions} draft={draft} />
     </section>
   );
 }
