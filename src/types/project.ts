@@ -1,22 +1,6 @@
 export type ComplexityLevel = "low" | "medium" | "high";
 
-export type EnvironmentType =
-  | "integrated"
-  | "circulation"
-  | "living"
-  | "bedroom"
-  | "suite"
-  | "bathroom"
-  | "social_bathroom"
-  | "powder_room"
-  | "kitchen"
-  | "living_room"
-  | "closet"
-  | "laundry"
-  | "balcony"
-  | "office"
-  | "commercial"
-  | "other";
+export type EnvironmentType = string;
 
 export type ProjectStatus = "estimating" | "in_progress" | "finished";
 
@@ -25,6 +9,7 @@ export type ProjectEnvironment = {
   type: EnvironmentType;
   name: string;
   roomLabel?: string;
+  complexityWeight?: number;
   squareMeters: number;
   complexity: ComplexityLevel;
 };

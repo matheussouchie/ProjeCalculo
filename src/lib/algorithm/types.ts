@@ -4,6 +4,7 @@ export type AlgorithmRoom = {
   id: string;
   type: EnvironmentType;
   squareMeters: number;
+  weight?: number;
 };
 
 export type HistoricalProductivitySample = {

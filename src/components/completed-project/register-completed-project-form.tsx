@@ -14,9 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  calculatorRoomOptions,
-  type CalculatorRoomType,
+import type {
+  CalculatorRoomOption,
+  CalculatorRoomType,
 } from "@/constants/calculator-rooms";
 import {
   completedProjectSchema,
@@ -31,7 +31,11 @@ const defaultValues: CompletedProjectValues = {
   rooms: [],
 };
 
-export function RegisterCompletedProjectForm() {
+export function RegisterCompletedProjectForm({
+  roomOptions,
+}: {
+  roomOptions: CalculatorRoomOption[];
+}) {
   const [state, setState] = useState<CompletedProjectActionState>({
     ok: false,
   });
@@ -59,7 +63,7 @@ export function RegisterCompletedProjectForm() {
   );
 
   function addRoom(type: CalculatorRoomType) {
-    const option = calculatorRoomOptions.find((room) => room.type === type);
+    const option = roomOptions.find((room) => room.type === type);
 
     roomIdCounter.current += 1;
     setState({ ok: false });
@@ -67,6 +71,7 @@ export function RegisterCompletedProjectForm() {
       id: `${type}_${roomIdCounter.current}`,
       type,
       roomLabel: "",
+      complexityWeight: option?.complexityWeight ?? 1,
       quantity: 1,
       squareMeters: option?.defaultSquareMeters ?? 10,
     });
@@ -78,7 +83,7 @@ export function RegisterCompletedProjectForm() {
         ...values,
         rooms: values.rooms.map((room) => ({
           ...room,
-          roomLabel: resolveRoomLabel(room, values.rooms),
+          roomLabel: resolveRoomLabel(room, values.rooms, roomOptions),
           quantity: 1,
         })),
       };
@@ -145,7 +150,7 @@ export function RegisterCompletedProjectForm() {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {calculatorRoomOptions.map((option) => (
+              {roomOptions.map((option) => (
                 <button
                   key={option.type}
                   type="button"
@@ -176,11 +181,9 @@ export function RegisterCompletedProjectForm() {
                 >
                   {fields.map((field, index) => {
                     const room = watchedRooms[index];
-                    const option = calculatorRoomOptions.find(
-                      (item) => item.type === room?.type,
-                    );
+                    const option = roomOptions.find((item) => item.type === room?.type);
                     const fallbackLabel = room
-                      ? resolveRoomLabel(room, watchedRooms)
+                      ? resolveRoomLabel(room, watchedRooms, roomOptions)
                       : "Ambiente";
 
                     return (
@@ -197,6 +200,10 @@ export function RegisterCompletedProjectForm() {
                         <input
                           type="hidden"
                           {...form.register(`rooms.${index}.quantity`)}
+                        />
+                        <input
+                          type="hidden"
+                          {...form.register(`rooms.${index}.complexityWeight`)}
                         />
                         <div className="grid gap-4 md:grid-cols-[1fr_1fr_160px_auto] md:items-end">
                           <div>

@@ -15,6 +15,7 @@ import { resolveRoomLabel } from "@/services/rooms/room-labels";
 import { mapStatisticsToProductivityProfile } from "@/services/user-statistics.service";
 import type { ProjectEstimate } from "@/types/project";
 import { calculateProjectEstimate } from "@/services/prediction";
+import type { Database } from "@/types/database";
 
 export type EstimateActionState = {
   ok: boolean;
@@ -71,10 +72,53 @@ async function getExistingProjectNames(
     .map((project) => project.name);
 }
 
-function buildEstimateInput(values: DeadlineCalculatorValues, projectName: string) {
+async function getUserRoomsById(
+  supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
+  userId: string,
+) {
+  const { data } = await supabase
+    .from("user_rooms")
+    .select("id,name,system_key,complexity_weight")
+    .eq("user_id", userId);
+
+  return new Map((data ?? []).map((room) => [room.id, room]));
+}
+
+function resolveServerRoomLabel(
+  room: DeadlineCalculatorValues["rooms"][number],
+  rooms: DeadlineCalculatorValues["rooms"],
+  userRoomsById: Map<
+    string,
+    Pick<Database["public"]["Tables"]["user_rooms"]["Row"], "name">
+  >,
+) {
+  const customLabel = room.roomLabel?.trim();
+
+  if (customLabel) {
+    return customLabel;
+  }
+
+  const baseName = userRoomsById.get(room.type)?.name ?? "Ambiente";
+  const sequence = String(
+    rooms
+      .filter((item) => item.type === room.type)
+      .findIndex((item) => item.id === room.id) + 1,
+  ).padStart(2, "0");
+
+  return `${baseName} ${sequence}`;
+}
+
+function buildEstimateInput(
+  values: DeadlineCalculatorValues,
+  projectName: string,
+  userRoomsById: Map<
+    string,
+    Pick<Database["public"]["Tables"]["user_rooms"]["Row"], "name">
+  >,
+) {
   const rooms = values.rooms.map((room) => ({
     ...room,
-    roomLabel: resolveRoomLabel(room, values.rooms),
+    roomLabel: resolveServerRoomLabel(room, values.rooms, userRoomsById),
   }));
 
   return {
@@ -87,9 +131,33 @@ function buildEstimateInput(values: DeadlineCalculatorValues, projectName: strin
         type: room.type,
         name: room.roomLabel,
         roomLabel: room.roomLabel,
+        complexityWeight: room.complexityWeight,
         squareMeters: Number(room.squareMeters),
         complexity: "medium" as const,
       })),
+  };
+}
+
+function getRoomPersistenceData(
+  room: {
+    type: string;
+    complexityWeight?: number;
+  },
+  userRoomsById: Map<
+    string,
+    Pick<
+      Database["public"]["Tables"]["user_rooms"]["Row"],
+      "id" | "name" | "system_key" | "complexity_weight"
+    >
+  >,
+) {
+  const userRoom = userRoomsById.get(room.type);
+  const weight = userRoom?.complexity_weight ?? room.complexityWeight ?? 1;
+
+  return {
+    userRoomId: userRoom?.id ?? null,
+    roomType: userRoom?.system_key ?? userRoom?.name ?? room.type,
+    weight,
   };
 }
 
@@ -232,10 +300,11 @@ export async function registerCompletedProjectAction(
     0,
   );
   const complexityScore = parsed.data.rooms.reduce((total, room) => {
-    const metrics = getPredictionRoomMetrics(room.type);
+    const metrics = getPredictionRoomMetrics(room.type, room.complexityWeight);
 
     return total + room.squareMeters * metrics.weight;
   }, 0);
+  const userRoomsById = await getUserRoomsById(supabase, user.id);
   const predictedDays = Math.max(
     1,
     Math.ceil(
@@ -266,11 +335,13 @@ export async function registerCompletedProjectAction(
 
   const { error: roomsError } = await supabase.from("project_rooms").insert(
     parsed.data.rooms.map((room) => {
-      const metrics = getPredictionRoomMetrics(room.type);
+      const persistence = getRoomPersistenceData(room, userRoomsById);
+      const metrics = getPredictionRoomMetrics(room.type, persistence.weight);
 
       return {
         project_id: project.id,
-        room_type: room.type,
+        user_room_id: persistence.userRoomId,
+        room_type: persistence.roomType,
         room_label: resolveRoomLabel(room, parsed.data.rooms),
         quantity: 1,
         square_meters: room.squareMeters,
@@ -336,7 +407,8 @@ export async function saveEstimateAction(
     parsed.data.projectId,
   );
   const projectName = getUniqueProjectName(parsed.data.projectName, existingNames);
-  const estimateInput = buildEstimateInput(parsed.data, projectName);
+  const userRoomsById = await getUserRoomsById(supabase, user.id);
+  const estimateInput = buildEstimateInput(parsed.data, projectName, userRoomsById);
 
   if (estimateInput.environments.length === 0) {
     return {
@@ -404,15 +476,20 @@ export async function saveEstimateAction(
   }
 
   const { error: roomsError } = await supabase.from("project_rooms").insert(
-    estimate.environments.map((environment) => ({
-      project_id: projectResponse.data.id,
-      room_type: environment.type,
-      room_label: environment.name,
-      quantity: 1,
-      square_meters: environment.squareMeters,
-      weight_used: environment.weight,
-      complexity_points: environment.complexityMultiplier,
-    })),
+    estimate.environments.map((environment) => {
+      const persistence = getRoomPersistenceData(environment, userRoomsById);
+
+      return {
+        project_id: projectResponse.data.id,
+        user_room_id: persistence.userRoomId,
+        room_type: persistence.roomType,
+        room_label: environment.name,
+        quantity: 1,
+        square_meters: environment.squareMeters,
+        weight_used: persistence.weight,
+        complexity_points: environment.complexityMultiplier,
+      };
+    }),
   );
 
   if (roomsError) {
@@ -508,7 +585,7 @@ export async function duplicateEstimateAction(
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .select(
-      "name,total_square_meters,predicted_days,complexity_score,project_rooms(room_type,room_label,quantity,square_meters,weight_used,complexity_points)",
+      "name,total_square_meters,predicted_days,complexity_score,project_rooms(user_room_id,room_type,room_label,quantity,square_meters,weight_used,complexity_points)",
     )
     .eq("id", projectId)
     .eq("user_id", user.id)
@@ -546,6 +623,7 @@ export async function duplicateEstimateAction(
   const { error: roomsError } = await supabase.from("project_rooms").insert(
     project.project_rooms.map((room) => ({
       project_id: duplicatedProject.id,
+      user_room_id: room.user_room_id,
       room_type: room.room_type,
       room_label: room.room_label,
       quantity: 1,

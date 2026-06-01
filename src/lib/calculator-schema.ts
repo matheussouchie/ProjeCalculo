@@ -10,20 +10,9 @@ const squareMetersSchema = z.coerce
 
 export const calculatorRoomSchema = z.object({
   id: z.string().min(1),
-  type: z.enum([
-    "living",
-    "integrated",
-    "kitchen",
-    "living_room",
-    "bedroom",
-    "suite",
-    "bathroom",
-    "social_bathroom",
-    "powder_room",
-    "circulation",
-    "other",
-  ]),
+  type: z.string().min(1),
   roomLabel: z.string().trim().max(80).optional(),
+  complexityWeight: z.coerce.number<number>().min(0.5).max(3),
   quantity: z.coerce.number<number>().int().min(1).max(1),
   squareMeters: squareMetersSchema,
   observation: z.string().max(160).optional(),

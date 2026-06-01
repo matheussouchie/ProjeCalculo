@@ -1,6 +1,9 @@
 import { RegisterCompletedProjectForm } from "@/components/completed-project/register-completed-project-form";
+import { getCurrentUserActiveRoomOptions } from "@/services/user-rooms/user-rooms.queries";
 
-export default function RegisterCompletedProjectPage() {
+export default async function RegisterCompletedProjectPage() {
+  const roomOptions = await getCurrentUserActiveRoomOptions();
+
   return (
     <section className="space-y-6">
       <div className="max-w-3xl">
@@ -11,7 +14,7 @@ export default function RegisterCompletedProjectPage() {
         </p>
       </div>
 
-      <RegisterCompletedProjectForm />
+      <RegisterCompletedProjectForm roomOptions={roomOptions} />
     </section>
   );
 }

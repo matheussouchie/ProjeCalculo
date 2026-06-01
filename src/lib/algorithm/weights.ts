@@ -1,6 +1,6 @@
 import type { EnvironmentType } from "@/types/project";
 
-export const PREDICTION_ROOM_WEIGHTS: Record<EnvironmentType, number> = {
+export const PREDICTION_ROOM_WEIGHTS: Record<string, number> = {
   living: 1.4,
   integrated: 1.3,
   kitchen: 1.5,

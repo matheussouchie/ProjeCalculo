@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/app/app-shell";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUserThemePreference } from "@/services/user-preferences/user-preferences.queries";
 import type { AppUser } from "@/types/auth";
 
 export default async function ProtectedAppLayout({
@@ -36,6 +37,11 @@ export default async function ProtectedAppLayout({
     name: profile?.name ?? fallbackName,
     email: profile?.email ?? user.email,
   };
+  const themePreference = await getCurrentUserThemePreference();
 
-  return <AppShell user={appUser}>{children}</AppShell>;
+  return (
+    <AppShell user={appUser} themePreference={themePreference}>
+      {children}
+    </AppShell>
+  );
 }

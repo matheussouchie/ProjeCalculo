@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Calculator,
+  Layers3,
   FolderKanban,
   Home,
   Settings,
@@ -23,6 +24,11 @@ export const appNavigationItems: AppNavigationItem[] = [
     title: "Calcular Prazo",
     href: "/calcular-prazo",
     icon: Calculator,
+  },
+  {
+    title: "Ambientes",
+    href: "/ambientes",
+    icon: Layers3,
   },
   {
     title: "Projetos",

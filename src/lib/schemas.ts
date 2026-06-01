@@ -10,26 +10,10 @@ const preciseSquareMetersSchema = z.coerce
 
 export const environmentSchema = z.object({
   id: z.string().min(1),
-  type: z.enum([
-    "integrated",
-    "circulation",
-    "living",
-    "bedroom",
-    "suite",
-    "bathroom",
-    "social_bathroom",
-    "powder_room",
-    "kitchen",
-    "living_room",
-    "closet",
-    "laundry",
-    "balcony",
-    "office",
-    "commercial",
-    "other",
-  ]),
+  type: z.string().min(1),
   name: z.string().min(2, "Informe um nome para o ambiente."),
   roomLabel: z.string().trim().max(80).optional(),
+  complexityWeight: z.coerce.number<number>().min(0.5).max(3).optional(),
   squareMeters: preciseSquareMetersSchema,
   complexity: z.enum(["low", "medium", "high"]),
 });
@@ -65,6 +49,20 @@ export const profileSettingsSchema = z.object({
     .min(2, "Informe um nome com pelo menos 2 caracteres.")
     .max(80, "Use um nome mais curto."),
 });
+
+export const emailSettingsSchema = z.object({
+  email: z.string().trim().email("Informe um email válido."),
+});
+
+export const passwordSettingsSchema = z
+  .object({
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
+    confirmation: z.string().min(6, "Confirme a nova senha."),
+  })
+  .refine((values) => values.password === values.confirmation, {
+    message: "As senhas não conferem.",
+    path: ["confirmation"],
+  });
 
 export type ProjectEstimateFormValues = z.infer<typeof projectEstimateSchema>;
 export type FinishProjectValues = z.infer<typeof finishProjectSchema>;

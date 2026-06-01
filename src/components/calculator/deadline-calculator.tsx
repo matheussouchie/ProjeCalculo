@@ -16,9 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  calculatorRoomOptions,
-  type CalculatorRoomType,
+import type {
+  CalculatorRoomOption,
+  CalculatorRoomType,
 } from "@/constants/calculator-rooms";
 import {
   deadlineCalculatorSchema,
@@ -39,6 +39,7 @@ type DeadlineCalculatorProps = {
   productivity: ProductivityProfile;
   historicalSamples?: PredictionHistorySample[];
   savedEstimates: SavedEstimate[];
+  roomOptions: CalculatorRoomOption[];
 };
 
 const defaultValues: DeadlineCalculatorValues = {
@@ -50,6 +51,7 @@ export function DeadlineCalculator({
   productivity,
   historicalSamples,
   savedEstimates,
+  roomOptions,
 }: DeadlineCalculatorProps) {
   const router = useRouter();
   const [showResult, setShowResult] = useState(false);
@@ -90,8 +92,9 @@ export function DeadlineCalculator({
       .map((room) => ({
         id: room.id,
         type: room.type,
-        name: resolveRoomLabel(room, watchedRooms),
-        roomLabel: resolveRoomLabel(room, watchedRooms),
+        name: resolveRoomLabel(room, watchedRooms, roomOptions),
+        roomLabel: resolveRoomLabel(room, watchedRooms, roomOptions),
+        complexityWeight: room.complexityWeight,
         squareMeters: Number(room.squareMeters),
         complexity: "medium" as const,
       }));
@@ -102,7 +105,7 @@ export function DeadlineCalculator({
       historicalSamples,
       environments,
     };
-  }, [historicalSamples, productivity, watchedProjectName, watchedRooms]);
+  }, [historicalSamples, productivity, roomOptions, watchedProjectName, watchedRooms]);
 
   const estimate = useMemo(() => {
     if (estimateInput.environments.length === 0) {
@@ -116,7 +119,7 @@ export function DeadlineCalculator({
   const totalRooms = watchedRooms.length;
 
   function addRoom(type: CalculatorRoomType) {
-    const option = calculatorRoomOptions.find((item) => item.type === type);
+    const option = roomOptions.find((item) => item.type === type);
 
     roomIdCounter.current += 1;
     setShowResult(false);
@@ -125,6 +128,7 @@ export function DeadlineCalculator({
       id: `${type}_${roomIdCounter.current}`,
       type,
       roomLabel: "",
+      complexityWeight: option?.complexityWeight ?? 1,
       quantity: 1,
       squareMeters: option?.defaultSquareMeters ?? 10,
       observation: "",
@@ -230,7 +234,7 @@ export function DeadlineCalculator({
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {calculatorRoomOptions.map((option) => (
+                {roomOptions.map((option) => (
                   <button
                     key={option.type}
                     type="button"
@@ -262,11 +266,11 @@ export function DeadlineCalculator({
                   >
                     {fields.map((field, index) => {
                       const room = watchedRooms[index];
-                      const option = calculatorRoomOptions.find(
+                      const option = roomOptions.find(
                         (item) => item.type === room?.type,
                       );
                       const fallbackLabel = room
-                        ? resolveRoomLabel(room, watchedRooms)
+                        ? resolveRoomLabel(room, watchedRooms, roomOptions)
                         : "Ambiente";
 
                       return (
@@ -286,6 +290,10 @@ export function DeadlineCalculator({
                           <input
                             type="hidden"
                             {...form.register(`rooms.${index}.quantity`)}
+                          />
+                          <input
+                            type="hidden"
+                            {...form.register(`rooms.${index}.complexityWeight`)}
                           />
                           <div className="grid gap-4 lg:grid-cols-[1fr_1fr_150px_auto] lg:items-end">
                             <div>

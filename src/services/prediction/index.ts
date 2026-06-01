@@ -1,6 +1,6 @@
 import { INITIAL_PRODUCTIVITY_BASE } from "@/constants/initial-history";
 import type { HistoricalProductivitySample } from "@/lib/algorithm";
-import { environmentLabels } from "@/lib/project-options";
+import { getEnvironmentLabel } from "@/lib/project-options";
 import type { FinishProjectValues } from "@/lib/schemas";
 import { forecastProjectDays } from "@/lib/algorithm";
 import type {
@@ -20,7 +20,7 @@ function buildInsights(environments: EnvironmentEstimate[], productivityUsed: nu
   }
 
   return [
-    `${environmentLabels[highestImpact.type]} concentra o maior impacto no prazo.`,
+    `${getEnvironmentLabel(highestImpact.type)} concentra o maior impacto no prazo.`,
     `Produtividade considerada: ${roundToOneDecimal(productivityUsed)} m2 por dia.`,
     "Projetos recentes possuem maior peso e outliers extremos sao suavizados.",
   ];
@@ -34,6 +34,7 @@ export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEs
       id: environment.id,
       type: environment.type,
       squareMeters: environment.squareMeters,
+      weight: environment.complexityWeight,
     })),
     averageProductivity: input.productivity.averageSquareMetersPerDay,
     historicalSamples: input.historicalSamples,
@@ -49,7 +50,7 @@ export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEs
     return {
       id: room.id,
       type: room.type,
-      name: original?.name ?? environmentLabels[room.type],
+      name: original?.name ?? getEnvironmentLabel(room.type),
       roomLabel: original?.roomLabel,
       squareMeters: roundToFourDecimals(room.squareMeters),
       complexity: original?.complexity ?? "medium",

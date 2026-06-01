@@ -5,13 +5,21 @@ import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
 import { AppLogo } from "@/components/app/app-logo";
+import { ThemeToggle } from "@/components/app/theme-toggle";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { Button } from "@/components/ui/button";
 import { appNavigationItems, getNavigationTitle } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
+import type { ThemePreference } from "@/services/user-preferences/user-preferences.queries";
 import type { AppUser } from "@/types/auth";
 
-export function AppHeader({ user }: { user: AppUser }) {
+export function AppHeader({
+  user,
+  themePreference,
+}: {
+  user: AppUser;
+  themePreference: ThemePreference;
+}) {
   const pathname = usePathname();
   const title = getNavigationTitle(pathname);
 
@@ -26,6 +34,7 @@ export function AppHeader({ user }: { user: AppUser }) {
         </div>
 
         <div className="hidden items-center gap-3 sm:flex">
+          <ThemeToggle initialTheme={themePreference} />
           <div className="text-right">
             <p className="text-sm font-medium">{user.name}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -41,6 +50,9 @@ export function AppHeader({ user }: { user: AppUser }) {
           </summary>
           <div className="absolute right-0 mt-3 w-[min(320px,calc(100vw-32px))] rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)]">
             <AppLogo />
+            <div className="mt-4">
+              <ThemeToggle initialTheme={themePreference} />
+            </div>
             <nav className="mt-5 space-y-1">
               {appNavigationItems.map((item) => {
                 const Icon = item.icon;

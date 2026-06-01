@@ -30,7 +30,7 @@ export function forecastProjectDays(input: ForecastInput): ForecastResult {
   const averageErrorMargin = calculateAverageErrorMargin(input.historicalSamples);
 
   const rooms = input.rooms.map((room) => {
-    const weight = getRoomWeight(room.type);
+    const weight = room.weight ?? getRoomWeight(room.type);
     const weightedSquareMeters = room.squareMeters * weight;
 
     return {

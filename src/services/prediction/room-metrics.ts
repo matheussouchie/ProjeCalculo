@@ -1,8 +1,8 @@
 import { getRoomWeight } from "@/lib/algorithm";
 import type { EnvironmentType } from "@/types/project";
 
-export function getPredictionRoomMetrics(type: EnvironmentType) {
-  const weight = getRoomWeight(type);
+export function getPredictionRoomMetrics(type: EnvironmentType, customWeight?: number) {
+  const weight = customWeight ?? getRoomWeight(type);
 
   return {
     weight,

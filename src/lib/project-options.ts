@@ -1,6 +1,6 @@
 import type { ComplexityLevel, EnvironmentType } from "@/types/project";
 
-export const environmentLabels: Record<EnvironmentType, string> = {
+export const environmentLabels: Partial<Record<EnvironmentType, string>> = {
   integrated: "Integrado",
   circulation: "Circulacao",
   living: "Living",
@@ -18,6 +18,10 @@ export const environmentLabels: Record<EnvironmentType, string> = {
   commercial: "Comercial",
   other: "Outro",
 };
+
+export function getEnvironmentLabel(type: EnvironmentType) {
+  return environmentLabels[type] ?? "Ambiente";
+}
 
 export const complexityLabels: Record<ComplexityLevel, string> = {
   low: "Baixa",

@@ -16,6 +16,8 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 8: `1.8` - dashboard analitico, graficos, historico e configuracoes.
 - Sprint 9: `1.9` - ambientes individualizados e metragens com 4 casas decimais.
 - Sprint 10: `1.10` - gerenciador de estimativas salvas.
+- Sprint 11: `1.11` - catalogo de ambientes por usuario com pesos personalizados.
+- Sprint 12: `1.12` - preferencias, tema persistido e sessao nao persistente.
 
 ## Stack
 
@@ -72,6 +74,8 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/services/analytics`: leitura e preparacao das metricas analiticas.
 - `src/services/estimates`: leitura e mapeamento de estimativas salvas.
 - `src/services/rooms`: geracao de nomes de ambientes individualizados.
+- `src/services/user-rooms`: catalogo de ambientes por usuario.
+- `src/services/user-preferences`: preferencias persistidas do usuario.
 - `src/services/project-area-adjustment.ts`: redistribui metragens para fechar um total informado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
@@ -159,3 +163,16 @@ deve ser executada manualmente no Supabase SQL Editor.
 - Estimativas salvas usam `projects.actual_days is null`.
 - O usuario pode salvar, editar, duplicar e excluir estimativas em
   `/calcular-prazo`.
+
+## Sprint 11 e Sprint 12
+
+As migrations abaixo devem ser executadas manualmente no Supabase SQL Editor:
+
+- `supabase/migrations/0003_user_room_catalog.sql`
+- `supabase/migrations/0004_user_preferences.sql`
+
+Sprint 11 cria `user_rooms`, insere ambientes padrao por usuario e permite usar
+pesos personalizados no algoritmo.
+
+Sprint 12 cria `user_preferences`, persiste tema claro/escuro, adiciona toggle
+Sol/Lua no header e configura a sessao para nao persistir no navegador.
