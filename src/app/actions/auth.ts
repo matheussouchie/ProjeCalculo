@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { getSiteUrl } from "@/lib/site-url";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type AuthActionState = {
@@ -11,18 +12,6 @@ export type AuthActionState = {
 
 function getString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
-}
-
-function getSiteUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL;
-  }
-
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  return "http://localhost:3000";
 }
 
 export async function signInAction(
@@ -99,7 +88,7 @@ export async function signUpAction(
     password,
     options: {
       data: { name },
-      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/dashboard`,
+      emailRedirectTo: `${getSiteUrl()}/auth/confirm`,
     },
   });
 

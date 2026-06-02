@@ -50,6 +50,7 @@ Abra `http://localhost:3000`.
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SITE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
@@ -81,6 +82,7 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/services/project-area-adjustment.ts`: redistribui metragens para fechar um total informado.
 - `src/hooks`: hooks reutilizaveis de interface.
 - `src/utils`: utilitarios puros.
+- `src/lib/site-url.ts`: resolve a URL base do app para callbacks e emails.
 
 ## Modelagem Sprint 2
 
@@ -191,3 +193,10 @@ manualmente no Supabase SQL Editor.
   `/registrar-projeto-concluido`.
 - Aviso offline e notificacoes padronizadas por tom: sucesso, erro, aviso e
   informacao.
+
+## Sprint 14
+
+- `/auth/confirm`: confirmacao profissional de cadastro via email.
+- `NEXT_PUBLIC_SITE_URL`: base dinamica usada em redirects do Supabase Auth.
+- O signup envia o usuario para `/auth/confirm`, evitando cair em `localhost`
+  sem contexto.
