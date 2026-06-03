@@ -35,6 +35,11 @@ export type SavedEstimateActionState = {
   estimateId?: string;
 };
 
+export type ProjectActionState = {
+  ok: boolean;
+  message?: string;
+};
+
 async function getHistoricalSamples(
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
   userId: string,
@@ -83,6 +88,23 @@ async function getUserRoomsById(
     .eq("user_id", userId);
 
   return new Map((data ?? []).map((room) => [room.id, room]));
+}
+
+async function getCompletedProjectById(
+  supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
+  userId: string,
+  projectId: string,
+) {
+  const { data } = await supabase
+    .from("projects")
+    .select(
+      "id,prediction_id,name,total_square_meters,predicted_days,actual_days,complexity_score,created_at,updated_at,completed_at,project_rooms(id,project_id,user_room_id,room_type,room_label,quantity,square_meters,weight_used,complexity_points)",
+    )
+    .eq("id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return data;
 }
 
 function resolveServerRoomLabel(
@@ -296,6 +318,8 @@ export async function registerCompletedProjectAction(
     };
   }
 
+  const projectId = parsed.data.projectId || undefined;
+  const predictionId = parsed.data.predictionId || undefined;
   const totalSquareMeters = parsed.data.rooms.reduce(
     (total, room) => total + room.squareMeters,
     0,
@@ -313,10 +337,92 @@ export async function registerCompletedProjectAction(
     ),
   );
 
+  if (projectId) {
+    const existingProject = await getCompletedProjectById(supabase, user.id, projectId);
+
+    if (!existingProject) {
+      return {
+        ok: false,
+        message: "Projeto não encontrado.",
+      };
+    }
+
+    const { error: updateError } = await supabase
+      .from("projects")
+      .update({
+        prediction_id: predictionId ?? null,
+        name: parsed.data.name,
+        total_square_meters: Number(totalSquareMeters.toFixed(4)),
+        predicted_days: predictedDays,
+        actual_days: parsed.data.actualDays,
+        complexity_score: Number(complexityScore.toFixed(4)),
+        completed_at: existingProject.completed_at,
+      })
+      .eq("id", projectId)
+      .eq("user_id", user.id);
+
+    if (updateError) {
+      return {
+        ok: false,
+        message: notificationMessages.saveError,
+      };
+    }
+
+    const { error: deleteRoomsError } = await supabase
+      .from("project_rooms")
+      .delete()
+      .eq("project_id", projectId);
+
+    if (deleteRoomsError) {
+      return {
+        ok: false,
+        message: notificationMessages.saveError,
+      };
+    }
+
+    const { error: insertRoomsError } = await supabase.from("project_rooms").insert(
+      parsed.data.rooms.map((room) => {
+        const persistence = getRoomPersistenceData(room, userRoomsById);
+        const metrics = getPredictionRoomMetrics(room.type, persistence.weight);
+
+        return {
+          project_id: projectId,
+          user_room_id: persistence.userRoomId,
+          room_type: persistence.roomType,
+          room_label: resolveRoomLabel(room, parsed.data.rooms),
+          quantity: 1,
+          square_meters: room.squareMeters,
+          weight_used: metrics.weight,
+          complexity_points: metrics.complexityPoints,
+        };
+      }),
+    );
+
+    if (insertRoomsError) {
+      return {
+        ok: false,
+        message: notificationMessages.saveError,
+      };
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/estatisticas");
+    revalidatePath("/projetos");
+    revalidatePath("/registrar-projeto-concluido");
+
+    return {
+      ok: true,
+      message: predictionId
+        ? notificationMessages.predictionLinked
+        : notificationMessages.updated,
+    };
+  }
+
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .insert({
       user_id: user.id,
+      prediction_id: predictionId ?? null,
       name: parsed.data.name,
       total_square_meters: Number(totalSquareMeters.toFixed(4)),
       predicted_days: predictedDays,
@@ -366,7 +472,9 @@ export async function registerCompletedProjectAction(
 
   return {
     ok: true,
-    message: notificationMessages.saved,
+    message: predictionId
+      ? notificationMessages.predictionLinked
+      : notificationMessages.saved,
   };
 }
 
@@ -649,5 +757,136 @@ export async function duplicateEstimateAction(
     ok: true,
     estimateId: duplicatedProject.id,
     message: notificationMessages.saved,
+  };
+}
+
+export async function deleteProjectAction(
+  projectId: string,
+): Promise<ProjectActionState> {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      ok: false,
+      message: "Configure o Supabase para excluir projetos.",
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      message: "Entre na sua conta para excluir projetos.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return {
+      ok: false,
+      message: notificationMessages.saveError,
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/estatisticas");
+  revalidatePath("/projetos");
+
+  return {
+    ok: true,
+    message: notificationMessages.deleted,
+  };
+}
+
+export async function duplicateProjectAction(
+  projectId: string,
+): Promise<ProjectActionState> {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      ok: false,
+      message: "Configure o Supabase para duplicar projetos.",
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      message: "Entre na sua conta para duplicar projetos.",
+    };
+  }
+
+  const project = await getCompletedProjectById(supabase, user.id, projectId);
+
+  if (!project) {
+    return {
+      ok: false,
+      message: "Projeto não encontrado.",
+    };
+  }
+
+  const { data: duplicatedProject, error: duplicateProjectError } = await supabase
+    .from("projects")
+    .insert({
+      user_id: user.id,
+      prediction_id: project.prediction_id,
+      name: `Cópia de ${project.name}`,
+      total_square_meters: project.total_square_meters,
+      predicted_days: project.predicted_days,
+      actual_days: project.actual_days,
+      complexity_score: project.complexity_score,
+      completed_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (duplicateProjectError) {
+    return {
+      ok: false,
+      message: notificationMessages.saveError,
+    };
+  }
+
+  const { error: roomsError } = await supabase.from("project_rooms").insert(
+    project.project_rooms.map((room) => ({
+      project_id: duplicatedProject.id,
+      user_room_id: room.user_room_id,
+      room_type: room.room_type,
+      room_label: room.room_label,
+      quantity: room.quantity,
+      square_meters: room.square_meters,
+      weight_used: room.weight_used,
+      complexity_points: room.complexity_points,
+    })),
+  );
+
+  if (roomsError) {
+    return {
+      ok: false,
+      message: notificationMessages.saveError,
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/estatisticas");
+  revalidatePath("/projetos");
+  revalidatePath("/registrar-projeto-concluido");
+
+  return {
+    ok: true,
+    message: notificationMessages.duplicated,
   };
 }

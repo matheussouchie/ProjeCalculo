@@ -19,6 +19,8 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 - Sprint 11: `1.11` - catalogo de ambientes por usuario com pesos personalizados.
 - Sprint 12: `1.12` - preferencias, tema persistido e sessao nao persistente.
 - Sprint 13: `1.13` - autosave global, rascunhos recuperaveis e notificacoes.
+- Sprint 14: `1.14` - confirmacao profissional de cadastro via email.
+- Sprint 15: `1.15` - acoes em projetos e associacao de estimativas concluidas.
 
 ## Stack
 
@@ -200,3 +202,9 @@ manualmente no Supabase SQL Editor.
 - `NEXT_PUBLIC_SITE_URL`: base dinamica usada em redirects do Supabase Auth.
 - O signup envia o usuario para `/auth/confirm`, evitando cair em `localhost`
   sem contexto.
+
+## Sprint 15
+
+- `/projetos`: edicao, duplicacao e exclusao com acoes visiveis.
+- `/registrar-projeto-concluido`: associacao opcional de estimativa salva.
+- `projects.prediction_id`: relacao para comparar previsao e resultado real.

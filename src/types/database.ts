@@ -75,6 +75,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
+          prediction_id: string | null;
           name: string;
           total_square_meters: number;
           predicted_days: number;
@@ -87,6 +88,7 @@ export type Database = {
         Insert: {
           id?: string;
           user_id: string;
+          prediction_id?: string | null;
           name?: string;
           total_square_meters: number;
           predicted_days: number;
@@ -97,6 +99,7 @@ export type Database = {
           completed_at?: string | null;
         };
         Update: {
+          prediction_id?: string | null;
           name?: string;
           total_square_meters?: number;
           predicted_days?: number;
@@ -111,6 +114,13 @@ export type Database = {
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "projects_prediction_id_fkey";
+            columns: ["prediction_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
             referencedColumns: ["id"];
           },
         ];

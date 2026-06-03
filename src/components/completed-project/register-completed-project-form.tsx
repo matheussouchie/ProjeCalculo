@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import type {
   CalculatorRoomOption,
   CalculatorRoomType,
@@ -26,21 +27,35 @@ import {
   type CompletedProjectValues,
 } from "@/lib/completed-project-schema";
 import { cn } from "@/lib/utils";
+import type { SavedEstimate } from "@/services/estimates/estimate-mappers";
+import { mapEstimateToCompletedProjectValues } from "@/services/projects/project-mappers";
 import { resolveRoomLabel } from "@/services/rooms/room-labels";
 import type { DraftRecord } from "@/types/draft";
 
 const defaultValues: CompletedProjectValues = {
+  projectId: "",
+  predictionId: "",
   name: "",
   actualDays: 1,
   rooms: [],
 };
 
+const ESTIMATE_DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
 export function RegisterCompletedProjectForm({
   roomOptions,
+  savedEstimates,
   draft,
+  initialProject,
 }: {
   roomOptions: CalculatorRoomOption[];
+  savedEstimates: SavedEstimate[];
   draft: DraftRecord<CompletedProjectValues> | null;
+  initialProject: CompletedProjectValues | null;
 }) {
   const [state, setState] = useState<CompletedProjectActionState>({
     ok: false,
@@ -52,7 +67,7 @@ export function RegisterCompletedProjectForm({
     defaultValues,
     mode: "onChange",
   });
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "rooms",
     keyName: "fieldKey",
@@ -62,16 +77,32 @@ export function RegisterCompletedProjectForm({
     control: form.control,
     name: "actualDays",
   });
+  const watchedPredictionId = useWatch({
+    control: form.control,
+    name: "predictionId",
+  });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
   const watchedValues = useWatch({ control: form.control });
+  const selectedEstimate = useMemo(
+    () => savedEstimates.find((estimate) => estimate.id === watchedPredictionId) ?? null,
+    [savedEstimates, watchedPredictionId],
+  );
   const autosaveValues = useMemo(
     () =>
       ({
+        projectId: watchedValues.projectId || "",
+        predictionId: watchedValues.predictionId || "",
         name: watchedValues.name ?? "",
         actualDays: watchedValues.actualDays ?? 1,
         rooms: (watchedValues.rooms ?? []) as CompletedProjectValues["rooms"],
       }) satisfies CompletedProjectValues,
-    [watchedValues.actualDays, watchedValues.name, watchedValues.rooms],
+    [
+      watchedValues.actualDays,
+      watchedValues.name,
+      watchedValues.projectId,
+      watchedValues.predictionId,
+      watchedValues.rooms,
+    ],
   );
   const autosave = useAutosaveDraft({
     scope: "completed_project",
@@ -81,12 +112,67 @@ export function RegisterCompletedProjectForm({
       Boolean(values.name?.trim()) || (values.rooms?.length ?? 0) > 0,
     onRestore: (values) => {
       form.reset(values);
+      replace(values.rooms ?? []);
     },
   });
   const totalSquareMeters = watchedRooms.reduce(
     (total, room) => total + Number(room.squareMeters || 0),
     0,
   );
+
+  useEffect(() => {
+    if (initialProject) {
+      form.reset(initialProject);
+      replace(initialProject.rooms);
+      return;
+    }
+
+    if (draft) {
+      const restoredValues = draft.payload as CompletedProjectValues;
+      form.reset(restoredValues);
+      replace(restoredValues.rooms ?? []);
+      return;
+    }
+
+    form.reset(defaultValues);
+    replace([]);
+  }, [draft, form, initialProject, replace]);
+
+  function applySelectedEstimate(estimateId: string) {
+    form.setValue("predictionId", estimateId, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+
+    if (!estimateId) {
+      replace([]);
+      return;
+    }
+
+    const estimate = savedEstimates.find((item) => item.id === estimateId);
+
+    if (!estimate) {
+      return;
+    }
+
+    const estimateValues = mapEstimateToCompletedProjectValues(estimate);
+
+    form.setValue("rooms", estimateValues.rooms, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+    replace(estimateValues.rooms);
+
+    if (!form.getValues("name")) {
+      form.setValue("name", estimateValues.name, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+    }
+  }
 
   function addRoom(type: CalculatorRoomType) {
     const option = roomOptions.find((room) => room.type === type);
@@ -119,6 +205,7 @@ export function RegisterCompletedProjectForm({
       if (response.ok) {
         autosave.clearDraft();
         form.reset(defaultValues);
+        replace([]);
       }
     });
   }
@@ -166,7 +253,33 @@ export function RegisterCompletedProjectForm({
               real.
             </p>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-[1fr_180px]">
+          <CardContent className="grid gap-4">
+            <input type="hidden" {...form.register("projectId")} />
+            <input type="hidden" {...form.register("predictionId")} />
+
+            <div className="space-y-2">
+              <Label htmlFor="prediction-id">Estimativa Relacionada</Label>
+              <Select
+                id="prediction-id"
+                value={watchedPredictionId || ""}
+                onChange={(event) => applySelectedEstimate(event.target.value)}
+              >
+                <option value="">Nenhuma estimativa vinculada</option>
+                {savedEstimates.map((estimate) => (
+                  <option key={estimate.id} value={estimate.id}>
+                    {estimate.name} · {estimate.totalSquareMeters.toFixed(4)} m² ·{" "}
+                    {estimate.predictedDays} dias ·{" "}
+                    {ESTIMATE_DATE_FORMATTER.format(new Date(estimate.updatedAt))}
+                  </option>
+                ))}
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {selectedEstimate
+                  ? "Ambientes, metragem e peso foram preenchidos a partir da estimativa vinculada."
+                  : "Opcional. Selecione uma estimativa salva para aproveitar a estrutura como ponto de partida."}
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="project-name">Nome do projeto</Label>
               <Input
@@ -180,6 +293,7 @@ export function RegisterCompletedProjectForm({
                 </p>
               ) : null}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="actual-days">Dias corridos</Label>
               <Input
@@ -276,7 +390,9 @@ export function RegisterCompletedProjectForm({
                               id={`room-label-${field.id}`}
                               className="mt-2"
                               placeholder={fallbackLabel}
-                              {...form.register(`rooms.${index}.roomLabel`)}
+                              {...form.register(`rooms.${index}.roomLabel`, {
+                                onChange: () => setState({ ok: false }),
+                              })}
                             />
                           </div>
                           <div>
@@ -287,7 +403,11 @@ export function RegisterCompletedProjectForm({
                               type="number"
                               min={0}
                               step="0.0001"
-                              {...form.register(`rooms.${index}.squareMeters`)}
+                              {...form.register(`rooms.${index}.squareMeters`, {
+                                onChange: () => {
+                                  setState({ ok: false });
+                                },
+                              })}
                             />
                           </div>
                           <Button

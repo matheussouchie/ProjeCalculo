@@ -1,11 +1,29 @@
 import { RegisterCompletedProjectForm } from "@/components/completed-project/register-completed-project-form";
 import type { CompletedProjectValues } from "@/lib/completed-project-schema";
 import { getCurrentUserDraft } from "@/services/drafts/drafts.queries";
+import { getCurrentUserSavedEstimates } from "@/services/estimates/saved-estimates.queries";
+import { getCurrentUserProjectForEditing } from "@/services/projects/projects.queries";
 import { getCurrentUserActiveRoomOptions } from "@/services/user-rooms/user-rooms.queries";
 
-export default async function RegisterCompletedProjectPage() {
+type RegisterCompletedProjectPageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default async function RegisterCompletedProjectPage({
+  searchParams,
+}: RegisterCompletedProjectPageProps) {
   const roomOptions = await getCurrentUserActiveRoomOptions();
-  const draft = await getCurrentUserDraft<CompletedProjectValues>("completed_project");
+  const savedEstimates = await getCurrentUserSavedEstimates();
+  const rawProjectId = searchParams?.projectId;
+  const projectId = Array.isArray(rawProjectId)
+    ? rawProjectId[0]?.trim()
+    : rawProjectId?.trim();
+  const initialProject =
+    projectId ? await getCurrentUserProjectForEditing(projectId) : null;
+  const draft =
+    initialProject === null
+      ? await getCurrentUserDraft<CompletedProjectValues>("completed_project")
+      : null;
 
   return (
     <section className="space-y-6">
@@ -17,7 +35,12 @@ export default async function RegisterCompletedProjectPage() {
         </p>
       </div>
 
-      <RegisterCompletedProjectForm roomOptions={roomOptions} draft={draft} />
+      <RegisterCompletedProjectForm
+        roomOptions={roomOptions}
+        savedEstimates={savedEstimates}
+        draft={draft}
+        initialProject={initialProject}
+      />
     </section>
   );
 }

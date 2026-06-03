@@ -26,7 +26,11 @@ export default async function ProjectsPage() {
         </Button>
       </div>
 
-      <ProjectHistoryList projects={projects} title="Histórico de projetos" />
+      <ProjectHistoryList
+        projects={projects}
+        title="Histórico de projetos"
+        showActions
+      />
     </section>
   );
 }

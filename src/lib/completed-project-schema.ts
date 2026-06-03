@@ -8,6 +8,8 @@ const squareMetersSchema = z.coerce
     message: "Use no máximo 4 casas decimais.",
   });
 
+const optionalUuidSchema = z.string().uuid().optional().or(z.literal(""));
+
 export const completedProjectRoomSchema = z.object({
   id: z.string().min(1),
   type: z.string().min(1),
@@ -18,6 +20,8 @@ export const completedProjectRoomSchema = z.object({
 });
 
 export const completedProjectSchema = z.object({
+  projectId: optionalUuidSchema,
+  predictionId: optionalUuidSchema,
   name: z.string().min(2, "Informe o nome do projeto.").max(80),
   actualDays: z.coerce
     .number<number>()
