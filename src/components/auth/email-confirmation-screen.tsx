@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -73,7 +73,7 @@ export function EmailConfirmationScreen({
             <div className="mb-8 flex size-12 items-center justify-center rounded-[16px] border border-white/25 bg-white/90 p-2 shadow-[var(--shadow-card)]">
               <Image
                 src="/icons/projecalculo-icon.svg"
-                alt="ProjeCalculo"
+                alt="OnTime²"
                 width={32}
                 height={32}
                 className="h-8 w-8 object-contain"
@@ -81,7 +81,7 @@ export function EmailConfirmationScreen({
               />
             </div>
             <Badge className="border-white/20 bg-white/90 text-foreground">
-              ProjeCalculo
+              OnTime²
             </Badge>
             <h1 className="mt-6 max-w-sm text-foreground">
               Seu acesso está sendo validado com segurança.
@@ -92,7 +92,7 @@ export function EmailConfirmationScreen({
             </p>
           </div>
           <p className="text-xs text-muted-foreground">
-            ProjeCalculo · Fluxo seguro de autenticação
+            OnTime² · Fluxo seguro de autenticação
           </p>
         </aside>
 
@@ -102,14 +102,14 @@ export function EmailConfirmationScreen({
               <span className="flex size-10 items-center justify-center rounded-[12px] border bg-card p-2 shadow-[var(--shadow-card)]">
                 <Image
                   src="/icons/projecalculo-icon.svg"
-                  alt="ProjeCalculo"
+                  alt="OnTime²"
                   width={24}
                   height={24}
                   className="h-6 w-6 object-contain"
                   priority
                 />
               </span>
-              <Badge variant="outline">ProjeCalculo</Badge>
+              <Badge variant="outline">OnTime²</Badge>
             </div>
             <motion.div
               key={variant}
@@ -176,3 +176,4 @@ export function EmailConfirmationScreen({
     </main>
   );
 }
+

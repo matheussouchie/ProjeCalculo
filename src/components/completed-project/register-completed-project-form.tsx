@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -249,7 +249,7 @@ export function RegisterCompletedProjectForm({
           <CardHeader>
             <CardTitle>Dados do projeto</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Informe o que foi entregue para o ProjeCalculo aprender com seu ritmo
+              Informe o que foi entregue para o OnTime² aprender com seu ritmo
               real.
             </p>
           </CardHeader>
@@ -499,3 +499,4 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

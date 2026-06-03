@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ChartNoAxesCombined } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ export function EmptyAnalyticsState() {
         </div>
         <h3 className="mt-6">Dados em formação</h3>
         <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-          Registre projetos concluídos para o ProjeCalculo aprender sua produtividade
+          Registre projetos concluídos para o OnTime² aprender sua produtividade
           real e montar gráficos mais precisos.
         </p>
         <Button asChild className="mt-6">
@@ -23,3 +23,4 @@ export function EmptyAnalyticsState() {
     </Card>
   );
 }
+

@@ -1,4 +1,4 @@
-import { RegisterCompletedProjectForm } from "@/components/completed-project/register-completed-project-form";
+﻿import { RegisterCompletedProjectForm } from "@/components/completed-project/register-completed-project-form";
 import type { CompletedProjectValues } from "@/lib/completed-project-schema";
 import { getCurrentUserDraft } from "@/services/drafts/drafts.queries";
 import { getCurrentUserSavedEstimates } from "@/services/estimates/saved-estimates.queries";
@@ -20,10 +20,9 @@ export default async function RegisterCompletedProjectPage({
     : rawProjectId?.trim();
   const initialProject =
     projectId ? await getCurrentUserProjectForEditing(projectId) : null;
-  const draft =
-    initialProject === null
-      ? await getCurrentUserDraft<CompletedProjectValues>("completed_project")
-      : null;
+  const draft = projectId
+    ? null
+    : await getCurrentUserDraft<CompletedProjectValues>("completed_project");
 
   return (
     <section className="space-y-6">
@@ -36,6 +35,7 @@ export default async function RegisterCompletedProjectPage({
       </div>
 
       <RegisterCompletedProjectForm
+        key={initialProject?.projectId ?? projectId ?? "new"}
         roomOptions={roomOptions}
         savedEstimates={savedEstimates}
         draft={draft}
@@ -44,3 +44,4 @@ export default async function RegisterCompletedProjectPage({
     </section>
   );
 }
+

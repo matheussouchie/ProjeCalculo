@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +46,7 @@ export function AuthCard({
             <div className="mb-8 flex size-12 items-center justify-center rounded-md border border-white/25 bg-white/90 p-2 shadow-[var(--shadow-card)]">
               <Image
                 src="/icons/projecalculo-icon.svg"
-                alt="Icone ProjeCalculo"
+                alt="Ícone OnTime²"
                 width={32}
                 height={32}
                 className="h-8 w-8 object-contain"
@@ -54,7 +54,7 @@ export function AuthCard({
               />
             </div>
             <Badge className="border-white/20 bg-white/90 text-foreground">
-              ProjeCalculo
+              OnTime²
             </Badge>
             <h1 className="mt-6 max-w-sm text-foreground">
               Prazos precisos para projetos de detalhamento.
@@ -64,7 +64,7 @@ export function AuthCard({
               projetistas acompanharem produtividade real.
             </p>
           </div>
-          <p className="text-xs text-muted-foreground">ProjeCalculo · Auth seguro</p>
+          <p className="text-xs text-muted-foreground">OnTime² · Auth seguro</p>
         </div>
 
         <Card className="rounded-none border-0 shadow-none">
@@ -73,14 +73,14 @@ export function AuthCard({
               <span className="flex size-10 items-center justify-center rounded-md border bg-card p-2 shadow-[var(--shadow-card)]">
                 <Image
                   src="/icons/projecalculo-icon.svg"
-                  alt="Icone ProjeCalculo"
+                  alt="Ícone OnTime²"
                   width={24}
                   height={24}
                   className="h-6 w-6 object-contain"
                   priority
                 />
               </span>
-              <Badge variant="outline">ProjeCalculo</Badge>
+              <Badge variant="outline">OnTime²</Badge>
             </div>
             <CardTitle className="text-2xl">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
@@ -104,3 +104,5 @@ export function AuthCard({
     </main>
   );
 }
+
+

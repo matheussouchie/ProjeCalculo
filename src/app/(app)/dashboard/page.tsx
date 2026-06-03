@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Activity, CalendarDays, Gauge, Percent, TrendingUp } from "lucide-react";
 
 import { AnalyticsMetricCard } from "@/components/analytics/analytics-metric-card";
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
           <h2 className="mt-4">Visão geral</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Acompanhe produtividade, precisão e histórico para entender como o
-            ProjeCalculo está aprendendo com seus projetos concluídos.
+            OnTime² está aprendendo com seus projetos concluídos.
           </p>
         </div>
         <Button asChild>
@@ -93,3 +93,4 @@ export default async function DashboardPage() {
     </section>
   );
 }
+

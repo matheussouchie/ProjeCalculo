@@ -1,11 +1,11 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 
 export function AppLogo() {
   return (
     <div className="min-w-0">
       <Image
         src="/logo/projecalculo-logo.svg"
-        alt="ProjeCalculo"
+        alt=""
         width={170}
         height={32}
         className="h-8 w-auto max-w-[170px] object-contain object-left"
@@ -15,3 +15,4 @@ export function AppLogo() {
     </div>
   );
 }
+

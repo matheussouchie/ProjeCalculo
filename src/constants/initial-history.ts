@@ -1,7 +1,7 @@
-import type { ProjectEnvironment } from "@/types/project";
+﻿import type { ProjectEnvironment } from "@/types/project";
 
 export const INITIAL_HISTORY_PROJECT = {
-  name: "Historico inicial ProjeCalculo",
+  name: "",
   totalSquareMeters: 91.43,
   actualDays: 11,
   rooms: [
@@ -42,3 +42,4 @@ export const INITIAL_PRODUCTIVITY_BASE = {
   completedProjects: 1,
   historicalAccuracy: 0.86,
 };
+

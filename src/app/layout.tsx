@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
 import { Providers } from "@/app/providers";
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ProjeCalculo",
+  title: "",
   description:
     "Previsao de prazos para detalhamento arquitetonico com historico real de produtividade.",
   icons: {
@@ -44,3 +44,4 @@ export default function RootLayout({
     </html>
   );
 }
+

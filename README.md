@@ -1,4 +1,4 @@
-# ProjeCalculo
+﻿# OnTime²
 
 Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com base em historico real de produtividade.
 
@@ -208,3 +208,5 @@ manualmente no Supabase SQL Editor.
 - `/projetos`: edicao, duplicacao e exclusao com acoes visiveis.
 - `/registrar-projeto-concluido`: associacao opcional de estimativa salva.
 - `projects.prediction_id`: relacao para comparar previsao e resultado real.
+
+
