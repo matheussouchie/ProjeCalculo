@@ -49,8 +49,7 @@ export function mapSavedEstimate(project: ProjectWithRooms): SavedEstimate {
     updatedAt: project.updated_at,
     rooms: project.project_rooms.map((room) => ({
       id: room.id,
-      type: (room.user_room_id ??
-        room.room_type) as DeadlineCalculatorValues["rooms"][number]["type"],
+      type: room.room_type as DeadlineCalculatorValues["rooms"][number]["type"],
       roomLabel: room.room_label,
       complexityWeight: room.weight_used,
       squareMeters: room.square_meters,

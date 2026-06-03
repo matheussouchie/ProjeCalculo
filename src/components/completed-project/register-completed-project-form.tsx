@@ -113,6 +113,7 @@ export function RegisterCompletedProjectForm({
     onRestore: (values) => {
       form.reset(values);
       replace(values.rooms ?? []);
+      roomIdCounter.current = values.rooms?.length ?? 0;
     },
   });
   const totalSquareMeters = watchedRooms.reduce(
@@ -124,6 +125,7 @@ export function RegisterCompletedProjectForm({
     if (initialProject) {
       form.reset(initialProject);
       replace(initialProject.rooms);
+      roomIdCounter.current = initialProject.rooms.length;
       return;
     }
 
@@ -131,11 +133,13 @@ export function RegisterCompletedProjectForm({
       const restoredValues = draft.payload as CompletedProjectValues;
       form.reset(restoredValues);
       replace(restoredValues.rooms ?? []);
+      roomIdCounter.current = restoredValues.rooms?.length ?? 0;
       return;
     }
 
     form.reset(defaultValues);
     replace([]);
+    roomIdCounter.current = 0;
   }, [draft, form, initialProject, replace]);
 
   function applySelectedEstimate(estimateId: string) {

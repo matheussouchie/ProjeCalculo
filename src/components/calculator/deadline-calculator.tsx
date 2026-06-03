@@ -74,7 +74,7 @@ export function DeadlineCalculator({
     defaultValues,
     mode: "onChange",
   });
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "rooms",
     keyName: "fieldKey",
@@ -104,6 +104,8 @@ export function DeadlineCalculator({
       Boolean(values.projectName?.trim()) || (values.rooms?.length ?? 0) > 0,
     onRestore: (values) => {
       form.reset(values);
+      replace(values.rooms ?? []);
+      roomIdCounter.current = values.rooms?.length ?? 0;
       setShowResult(false);
       setShowSaveDialog(false);
     },
@@ -216,7 +218,11 @@ export function DeadlineCalculator({
   }
 
   function editEstimate(savedEstimate: SavedEstimate) {
-    form.reset(mapEstimateToCalculatorValues(savedEstimate));
+    const estimateValues = mapEstimateToCalculatorValues(savedEstimate);
+
+    form.reset(estimateValues);
+    replace(estimateValues.rooms);
+    roomIdCounter.current = estimateValues.rooms.length;
     setShowResult(false);
     setShowSaveDialog(false);
     setSaveState({ ok: false });

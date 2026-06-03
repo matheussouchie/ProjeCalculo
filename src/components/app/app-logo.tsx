@@ -5,7 +5,7 @@ export function AppLogo() {
     <div className="min-w-0">
       <Image
         src="/logo/projecalculo-logo.svg"
-        alt=""
+        alt="OnTime²"
         width={170}
         height={32}
         className="h-8 w-auto max-w-[170px] object-contain object-left"
