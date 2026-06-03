@@ -4,7 +4,7 @@ export function AppLogo() {
   return (
     <div className="min-w-0">
       <Image
-        src="/logo/projecalculo-logo.svg"
+        src="/branding/logo.svg"
         alt="OnTime²"
         width={170}
         height={32}

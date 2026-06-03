@@ -45,7 +45,7 @@ export function AuthCard({
           <div>
             <div className="mb-8 flex size-12 items-center justify-center rounded-md border border-white/25 bg-white/90 p-2 shadow-[var(--shadow-card)]">
               <Image
-                src="/icons/projecalculo-icon.svg"
+                src="/branding/icon.svg"
                 alt="Ícone OnTime²"
                 width={32}
                 height={32}
@@ -71,8 +71,8 @@ export function AuthCard({
           <CardHeader>
             <div className="mb-3 flex items-center gap-3 md:hidden">
               <span className="flex size-10 items-center justify-center rounded-md border bg-card p-2 shadow-[var(--shadow-card)]">
-                <Image
-                  src="/icons/projecalculo-icon.svg"
+              <Image
+                  src="/branding/icon.svg"
                   alt="Ícone OnTime²"
                   width={24}
                   height={24}

@@ -16,19 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "",
+  title: "OnTime²",
   description:
     "Previsao de prazos para detalhamento arquitetonico com historico real de produtividade.",
-  icons: {
-    icon: [
-      {
-        url: "/icons/projecalculo-icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    shortcut: "/icons/projecalculo-icon.svg",
-    apple: "/icons/projecalculo-icon.svg",
-  },
 };
 
 export default function RootLayout({
