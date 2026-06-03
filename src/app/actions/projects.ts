@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 
@@ -105,6 +105,22 @@ async function getCompletedProjectById(
     .maybeSingle();
 
   return data;
+}
+
+async function getPredictionProjectPredictedDays(
+  supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
+  userId: string,
+  predictionId: string,
+) {
+  const { data } = await supabase
+    .from("projects")
+    .select("predicted_days")
+    .eq("id", predictionId)
+    .eq("user_id", userId)
+    .is("actual_days", null)
+    .maybeSingle();
+
+  return data?.predicted_days ?? null;
 }
 
 function resolveServerRoomLabel(
@@ -330,16 +346,35 @@ export async function registerCompletedProjectAction(
     return total + room.squareMeters * metrics.weight;
   }, 0);
   const userRoomsById = await getUserRoomsById(supabase, user.id);
-  const predictedDays = Math.max(
-    1,
-    Math.ceil(
-      complexityScore / Math.max(totalSquareMeters / parsed.data.actualDays, 1),
-    ),
-  );
+  const statisticsResponse = await supabase
+    .from("user_statistics")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const existingProject = projectId
+    ? await getCompletedProjectById(supabase, user.id, projectId)
+    : null;
+  const linkedPredictionDays = predictionId
+    ? await getPredictionProjectPredictedDays(supabase, user.id, predictionId)
+    : null;
+  const fallbackPredictedDays = calculateProjectEstimate({
+    projectName: parsed.data.name,
+    environments: parsed.data.rooms.map((room) => ({
+      id: room.id,
+      type: room.type,
+      name: resolveServerRoomLabel(room, parsed.data.rooms, userRoomsById),
+      roomLabel: resolveServerRoomLabel(room, parsed.data.rooms, userRoomsById),
+      complexityWeight: room.complexityWeight,
+      squareMeters: room.squareMeters,
+      complexity: "medium" as const,
+    })),
+    productivity: mapStatisticsToProductivityProfile(statisticsResponse.data),
+    historicalSamples: await getHistoricalSamples(supabase, user.id),
+  }).recommendedDays;
+  const predictedDays =
+    linkedPredictionDays ?? existingProject?.predicted_days ?? fallbackPredictedDays;
 
   if (projectId) {
-    const existingProject = await getCompletedProjectById(supabase, user.id, projectId);
-
     if (!existingProject) {
       return {
         ok: false,
@@ -890,3 +925,5 @@ export async function duplicateProjectAction(
     message: notificationMessages.duplicated,
   };
 }
+
+

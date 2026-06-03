@@ -8,6 +8,7 @@ type UserStatisticsRow = Database["public"]["Tables"]["user_statistics"]["Row"];
 export type AnalyticsProject = Pick<
   ProjectRow,
   | "id"
+  | "prediction_id"
   | "name"
   | "total_square_meters"
   | "predicted_days"
@@ -16,7 +17,11 @@ export type AnalyticsProject = Pick<
   | "created_at"
   | "updated_at"
   | "completed_at"
->;
+> & {
+  prediction?: {
+    predicted_days: number;
+  }[] | null;
+};
 
 export type AnalyticsTrendPoint = {
   label: string;
@@ -61,12 +66,14 @@ function getProjectDate(project: AnalyticsProject) {
 }
 
 function getErrorPercent(project: AnalyticsProject) {
-  if (!project.actual_days || project.predicted_days <= 0) {
+  const predictedDays = project.prediction?.[0]?.predicted_days ?? project.predicted_days;
+
+  if (!project.actual_days || predictedDays <= 0) {
     return 0;
   }
 
   const errorRatio =
-    Math.abs(project.actual_days - project.predicted_days) / project.predicted_days;
+    Math.abs(project.actual_days - predictedDays) / predictedDays;
 
   return roundToOneDecimal(errorRatio * 100);
 }
@@ -110,6 +117,7 @@ export function buildDashboardAnalytics(
 
   const productivityTrend = completedProjects.map((project) => {
     const actualDays = project.actual_days ?? 1;
+    const predictedDays = project.prediction?.[0]?.predicted_days ?? project.predicted_days;
     const projectDate = getProjectDate(project);
 
     return {
@@ -117,7 +125,7 @@ export function buildDashboardAnalytics(
       date: projectDate.toISOString(),
       projectName: project.name,
       productivity: roundToOneDecimal(project.total_square_meters / actualDays),
-      predictedDays: project.predicted_days,
+      predictedDays,
       actualDays,
       errorPercent: getErrorPercent(project),
       squareMeters: roundToOneDecimal(project.total_square_meters),

@@ -4,23 +4,23 @@ Sistema web para previsao de prazos de detalhamento arquitetonico/interiores com
 
 ## Versao
 
-- Sprint 1: `1.1` - fundacao Next.js, UI, Supabase e arquitetura base.
-- Sprint 2: `1.2` - modelagem relacional PostgreSQL/Supabase.
-- Sprint 3: `1.3` - autenticacao completa e app shell protegido.
-- Sprint 3.5: branding oficial com favicon, logo e icone.
-- Sprint 4: `1.4` - calculadora principal de prazo com cards interativos.
-- Sprint 5: `1.5` - motor de previsao isolado da UI.
-- Sprint 6: `1.6` - registro de projeto concluido para atualizar produtividade.
-- Sprint 6.5: metragem total editavel na calculadora com redistribuicao proporcional.
-- Sprint 7: `1.7` - aprendizado dinamico com peso maior para projetos recentes.
-- Sprint 8: `1.8` - dashboard analitico, graficos, historico e configuracoes.
-- Sprint 9: `1.9` - ambientes individualizados e metragens com 4 casas decimais.
-- Sprint 10: `1.10` - gerenciador de estimativas salvas.
-- Sprint 11: `1.11` - catalogo de ambientes por usuario com pesos personalizados.
-- Sprint 12: `1.12` - preferencias, tema persistido e sessao nao persistente.
-- Sprint 13: `1.13` - autosave global, rascunhos recuperaveis e notificacoes.
-- Sprint 14: `1.14` - confirmacao profissional de cadastro via email.
-- Sprint 15: `1.15` - acoes em projetos e associacao de estimativas concluidas.
+- Marco 1: `1.1` - fundacao Next.js, UI, Supabase e arquitetura base.
+- Marco 2: `1.2` - modelagem relacional PostgreSQL/Supabase.
+- Marco 3: `1.3` - autenticacao completa e app shell protegido.
+- Marco 3.5: branding oficial com favicon, logo e icone.
+- Marco 4: `1.4` - calculadora principal de prazo com cards interativos.
+- Marco 5: `1.5` - motor de previsao isolado da UI.
+- Marco 6: `1.6` - registro de projeto concluido para atualizar produtividade.
+- Marco 6.5: metragem total editavel na calculadora com redistribuicao proporcional.
+- Marco 7: `1.7` - aprendizado dinamico com peso maior para projetos recentes.
+- Marco 8: `1.8` - dashboard analitico, graficos, historico e configuracoes.
+- Marco 9: `1.9` - ambientes individualizados e metragens com 4 casas decimais.
+- Marco 10: `1.10` - gerenciador de estimativas salvas.
+- Marco 11: `1.11` - catalogo de ambientes por usuario com pesos personalizados.
+- Marco 12: `1.12` - preferencias, tema persistido e sessao nao persistente.
+- Marco 13: `1.13` - autosave global, rascunhos recuperaveis e notificacoes.
+- Marco 14: `1.14` - confirmacao profissional de cadastro via email.
+- Marco 15: `1.15` - acoes em projetos e associacao de estimativas concluidas.
 
 ## Stack
 
@@ -86,7 +86,7 @@ Sem as variaveis do Supabase, o calculo continua funcionando, mas o historico na
 - `src/utils`: utilitarios puros.
 - `src/lib/site-url.ts`: resolve a URL base do app para callbacks e emails.
 
-## Modelagem Sprint 2
+## Modelagem Marco 2
 
 - `profiles`: identidade publica do usuario ligada ao Supabase Auth.
 - `projects`: projetos estimados/concluidos por usuario.
@@ -101,7 +101,7 @@ O trigger `handle_new_user` cria perfil, estatisticas e o primeiro historico aut
 - BWC Filha: 6.53 m2
 - Total: 91.43 m2 em 11 dias corridos
 
-## Auth Sprint 3
+## Auth Marco 3
 
 - `/login`: entrada com email e senha.
 - `/signup`: cadastro com nome, email e senha.
@@ -110,7 +110,7 @@ O trigger `handle_new_user` cria perfil, estatisticas e o primeiro historico aut
 - `/dashboard`, `/calcular-prazo`, `/projetos`, `/estatisticas`, `/configuracoes`: rotas protegidas dentro do app shell.
 - `/registrar-projeto-concluido`: fluxo protegido para ensinar o sistema com projetos finalizados.
 
-## Motor Sprint 5
+## Motor Marco 5
 
 A UI nao conhece a formula. Componentes chamam apenas `src/services/prediction`.
 
@@ -131,7 +131,7 @@ Regras aplicadas:
 - media movel ponderada: projetos recentes representam 70% e antigos 30%;
 - normalizacao limita saltos bruscos de produtividade.
 
-## Sprint 6
+## Marco 6
 
 O fluxo "Registrar Projeto Concluído" grava:
 
@@ -143,7 +143,7 @@ O fluxo "Registrar Projeto Concluído" grava:
 Ao salvar, o projeto entra como concluído em `projects`, os ambientes entram em
 `project_rooms` e o trigger do Supabase recalcula `user_statistics`.
 
-## Sprint 8
+## Marco 8
 
 O dashboard analitico exibe:
 
@@ -157,7 +157,7 @@ O dashboard analitico exibe:
 As abas finais do SaaS permanecem enxutas: Dashboard, Calcular Prazo, Projetos,
 Estatisticas e Configuracoes.
 
-## Sprint 9 e Sprint 10
+## Marco 9 e Marco 10
 
 A migration `supabase/migrations/0002_room_instances_and_saved_estimates.sql`
 deve ser executada manualmente no Supabase SQL Editor.
@@ -170,20 +170,20 @@ deve ser executada manualmente no Supabase SQL Editor.
 - O usuario pode salvar, editar, duplicar e excluir estimativas em
   `/calcular-prazo`.
 
-## Sprint 11 e Sprint 12
+## Marco 11 e Marco 12
 
 As migrations abaixo devem ser executadas manualmente no Supabase SQL Editor:
 
 - `supabase/migrations/0003_user_room_catalog.sql`
 - `supabase/migrations/0004_user_preferences.sql`
 
-Sprint 11 cria `user_rooms`, insere ambientes padrao por usuario e permite usar
+Marco 11 cria `user_rooms`, insere ambientes padrao por usuario e permite usar
 pesos personalizados no algoritmo.
 
-Sprint 12 cria `user_preferences`, persiste tema claro/escuro, adiciona toggle
+Marco 12 cria `user_preferences`, persiste tema claro/escuro, adiciona toggle
 Sol/Lua no header e configura a sessao para nao persistir no navegador.
 
-## Sprint 13
+## Marco 13
 
 A migration `supabase/migrations/0005_drafts_autosave.sql` deve ser executada
 manualmente no Supabase SQL Editor.
@@ -196,17 +196,18 @@ manualmente no Supabase SQL Editor.
 - Aviso offline e notificacoes padronizadas por tom: sucesso, erro, aviso e
   informacao.
 
-## Sprint 14
+## Marco 14
 
 - `/auth/confirm`: confirmacao profissional de cadastro via email.
 - `NEXT_PUBLIC_SITE_URL`: base dinamica usada em redirects do Supabase Auth.
 - O signup envia o usuario para `/auth/confirm`, evitando cair em `localhost`
   sem contexto.
 
-## Sprint 15
+## Marco 15
 
 - `/projetos`: edicao, duplicacao e exclusao com acoes visiveis.
 - `/registrar-projeto-concluido`: associacao opcional de estimativa salva.
 - `projects.prediction_id`: relacao para comparar previsao e resultado real.
+
 
 

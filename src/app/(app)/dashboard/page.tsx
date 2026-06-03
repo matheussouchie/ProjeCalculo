@@ -6,7 +6,6 @@ import { EmptyAnalyticsState } from "@/components/analytics/empty-analytics-stat
 import { PredictionErrorChart } from "@/components/analytics/prediction-error-chart";
 import { ProductivityChart } from "@/components/analytics/productivity-chart";
 import { ProjectHistoryList } from "@/components/analytics/project-history-list";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildDashboardAnalytics } from "@/services/analytics/dashboard-analytics.service";
@@ -21,7 +20,6 @@ export default async function DashboardPage() {
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-3xl">
-          <Badge variant="secondary">Sprint 8 · Analytics</Badge>
           <h2 className="mt-4">Visão geral</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Acompanhe produtividade, precisão e histórico para entender como o

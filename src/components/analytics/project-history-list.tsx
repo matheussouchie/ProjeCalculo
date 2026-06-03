@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,6 +42,10 @@ function getProjectStatus(project: AnalyticsProject) {
   }
 
   return "Estimado";
+}
+
+function getPredictedDays(project: AnalyticsProject) {
+  return project.prediction?.[0]?.predicted_days ?? project.predicted_days;
 }
 
 export function ProjectHistoryList({
@@ -108,7 +112,7 @@ export function ProjectHistoryList({
               </div>
 
               <Metric label="Metragem" value={`${roundToOneDecimal(project.total_square_meters)} m²`} />
-              <Metric label="Previsto" value={`${project.predicted_days} dias`} />
+              <Metric label="Previsto" value={`${getPredictedDays(project)} dias`} />
               <Metric
                 label="Real"
                 value={project.actual_days ? `${project.actual_days} dias` : "--"}
@@ -200,3 +204,5 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+

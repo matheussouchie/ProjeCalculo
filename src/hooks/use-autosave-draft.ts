@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useCallback,
@@ -31,7 +31,7 @@ type UseAutosaveDraftOptions<TValues extends object> = {
 const AUTOSAVE_DELAY_MS = 3000;
 
 function getStorageKey(scope: DraftScope, entityId?: string | null) {
-  return `projecalculo:draft:${scope}:${entityId ?? "new"}`;
+  return `ontime2:draft:${scope}:${entityId ?? "new"}`;
 }
 
 function safelyParseDraft<TValues>(value: string | null) {
@@ -196,3 +196,4 @@ export function useAutosaveDraft<TValues extends object>({
     clearDraft,
   };
 }
+
