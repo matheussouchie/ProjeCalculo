@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
@@ -61,6 +62,7 @@ export function RegisterCompletedProjectForm({
     ok: false,
   });
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const roomIdCounter = useRef(0);
   const form = useForm<CompletedProjectValues>({
     resolver: zodResolver(completedProjectSchema),
@@ -210,6 +212,7 @@ export function RegisterCompletedProjectForm({
         autosave.clearDraft();
         form.reset(defaultValues);
         replace([]);
+        router.push("/projetos");
       }
     });
   }
@@ -413,6 +416,11 @@ export function RegisterCompletedProjectForm({
                                 },
                               })}
                             />
+                            {form.formState.errors.rooms?.[index]?.squareMeters ? (
+                              <p className="mt-1 text-xs text-destructive">
+                                {form.formState.errors.rooms[index].squareMeters.message}
+                              </p>
+                            ) : null}
                           </div>
                           <Button
                             type="button"

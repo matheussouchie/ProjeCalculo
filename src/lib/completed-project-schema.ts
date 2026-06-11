@@ -4,7 +4,7 @@ const squareMetersSchema = z.coerce
   .number<number>()
   .positive()
   .max(500)
-  .refine((value) => Number.isInteger(value * 10000), {
+  .refine((value) => Number.isInteger(Math.round(value * 10000)), {
     message: "Use no máximo 4 casas decimais.",
   });
 
