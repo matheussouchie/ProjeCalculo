@@ -4,7 +4,7 @@ const preciseSquareMetersSchema = z.coerce
   .number<number>()
   .positive("A metragem deve ser maior que zero.")
   .max(500, "Revise a metragem informada.")
-  .refine((value) => Number.isInteger(value * 10000), {
+  .refine((value) => Number.isInteger(Math.round(value * 10000)), {
     message: "Use no máximo 4 casas decimais.",
   });
 
