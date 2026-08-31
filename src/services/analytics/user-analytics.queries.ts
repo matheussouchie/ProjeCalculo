@@ -27,7 +27,7 @@ export async function getCurrentUserAnalytics() {
     supabase
       .from("projects")
       .select(
-        "id,prediction_id,name,total_square_meters,predicted_days,actual_days,complexity_score,created_at,updated_at,completed_at,prediction:projects!projects_prediction_id_fkey(predicted_days)",
+        "id,prediction_id,name,total_square_meters,predicted_days,actual_days,complexity_score,created_at,updated_at,completed_at",
       )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
