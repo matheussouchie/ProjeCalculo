@@ -8,6 +8,11 @@ import {
   profileSettingsSchema,
 } from "@/lib/schemas";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  removeUserAvatar,
+  uploadUserAvatar,
+  validateAvatarFile,
+} from "@/services/profile/avatar.service";
 
 export type ProfileActionState = {
   ok: boolean;
@@ -49,12 +54,43 @@ export async function updateProfileAction(
     };
   }
 
+  const avatar = validateAvatarFile(formData.get("avatar"));
+
+  if (avatar.error) {
+    return { ok: false, message: avatar.error };
+  }
+
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("avatar_path")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  let avatarPath = currentProfile?.avatar_path ?? null;
+
+  if (avatar.file) {
+    const uploadedAvatar = await uploadUserAvatar(supabase, user.id, avatar.file);
+
+    if (uploadedAvatar.error || !uploadedAvatar.path) {
+      return {
+        ok: false,
+        message: "Não foi possível enviar a imagem agora.",
+      };
+    }
+
+    avatarPath = uploadedAvatar.path;
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({ name: parsed.data.name })
+    .update({ name: parsed.data.name, avatar_path: avatarPath })
     .eq("id", user.id);
 
   if (error) {
+    if (avatar.file && avatarPath !== currentProfile?.avatar_path) {
+      await removeUserAvatar(supabase, avatarPath);
+    }
+
     return {
       ok: false,
       message: "Não foi possível atualizar o perfil agora.",
@@ -63,11 +99,77 @@ export async function updateProfileAction(
 
   revalidatePath("/configuracoes");
   revalidatePath("/dashboard");
+  revalidatePath("/projetos");
+  revalidatePath("/estatisticas");
+  revalidatePath("/calcular-prazo");
+  revalidatePath("/registrar-projeto-concluido");
+
+  if (avatar.file && currentProfile?.avatar_path) {
+    await removeUserAvatar(supabase, currentProfile.avatar_path);
+  }
 
   return {
     ok: true,
-    message: "Perfil atualizado com sucesso.",
+    message: avatar.file
+      ? "Perfil e foto atualizados com sucesso."
+      : "Perfil atualizado com sucesso.",
   };
+}
+
+export async function removeAvatarAction(
+  _state: ProfileActionState,
+  _formData: FormData,
+): Promise<ProfileActionState> {
+  void _state;
+  void _formData;
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      ok: false,
+      message: "Configure as variáveis do Supabase para atualizar o perfil.",
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      message: "Sessão expirada. Entre novamente.",
+    };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("avatar_path")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    return { ok: false, message: "Não foi possível atualizar a foto agora." };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_path: null })
+    .eq("id", user.id);
+
+  if (error) {
+    return { ok: false, message: "Não foi possível atualizar a foto agora." };
+  }
+
+  await removeUserAvatar(supabase, profile?.avatar_path);
+  revalidatePath("/configuracoes");
+  revalidatePath("/dashboard");
+  revalidatePath("/projetos");
+  revalidatePath("/estatisticas");
+  revalidatePath("/calcular-prazo");
+  revalidatePath("/registrar-projeto-concluido");
+
+  return { ok: true, message: "Foto de perfil removida." };
 }
 
 export async function updateEmailAction(

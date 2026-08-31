@@ -39,6 +39,7 @@ export function removeExtremeOutliers(values: number[]) {
 export function calculateHistoricalProductivity(
   samples: HistoricalProductivitySample[] | undefined,
   fallbackProductivity: number,
+  personalizedProductivity?: number,
 ) {
   const validSamples = (samples ?? [])
     .map((sample, index) => ({
@@ -69,8 +70,13 @@ export function calculateHistoricalProductivity(
     validSamples.map((entry) => entry.productivity),
   );
 
+  const anchorProductivity =
+    personalizedProductivity && personalizedProductivity > 0
+      ? personalizedProductivity
+      : fallbackProductivity;
+
   if (productivities.length === 0) {
-    return Math.max(fallbackProductivity, MIN_PRODUCTIVITY);
+    return Math.max(anchorProductivity, MIN_PRODUCTIVITY);
   }
 
   const recentLimit = Math.max(1, Math.ceil(productivities.length * 0.35));
@@ -82,11 +88,15 @@ export function calculateHistoricalProductivity(
     ? older.reduce((sum, value) => sum + value, 0) / older.length
     : recentAverage;
   const weightedAverage = recentAverage * RECENT_WEIGHT + olderAverage * OLDER_WEIGHT;
-  const lowerLimit = fallbackProductivity * (1 - MAX_PRODUCTIVITY_SHIFT);
-  const upperLimit = fallbackProductivity * (1 + MAX_PRODUCTIVITY_SHIFT);
+  const historicalInfluence = Math.min(0.85, 0.35 + productivities.length * 0.1);
+  const blendedAverage =
+    anchorProductivity * (1 - historicalInfluence) +
+    weightedAverage * historicalInfluence;
+  const lowerLimit = anchorProductivity * (1 - MAX_PRODUCTIVITY_SHIFT);
+  const upperLimit = anchorProductivity * (1 + MAX_PRODUCTIVITY_SHIFT);
 
   return Math.max(
-    Math.min(Math.max(weightedAverage, lowerLimit), upperLimit),
+    Math.min(Math.max(blendedAverage, lowerLimit), upperLimit),
     MIN_PRODUCTIVITY,
   );
 }
@@ -116,6 +126,38 @@ export function calculateAverageErrorMargin(
   return margins.reduce((sum, margin) => sum + margin, 0) / margins.length;
 }
 
+export function calculatePredictionBias(
+  samples: HistoricalProductivitySample[] | undefined,
+) {
+  const biases = (samples ?? [])
+    .filter(
+      (sample) =>
+        sample.predictedDays !== null &&
+        sample.predictedDays !== undefined &&
+        sample.predictedDays > 0 &&
+        sample.actualDays > 0,
+    )
+    .map(
+      (sample) => (sample.actualDays - sample.predictedDays!) / sample.predictedDays!,
+    );
+
+  if (biases.length === 0) {
+    return 0;
+  }
+
+  const absoluteBiases = removeExtremeOutliers(biases.map((bias) => Math.abs(bias)));
+  const robustBiases = biases.filter((bias) => absoluteBiases.includes(Math.abs(bias)));
+
+  return Math.min(
+    Math.max(
+      robustBiases.reduce((sum, bias) => sum + bias, 0) /
+        Math.max(robustBiases.length, 1),
+      -0.2,
+    ),
+    0.2,
+  );
+}
+
 export function resolveProductivity({
   averageProductivity,
   historicalSamples,
@@ -126,7 +168,11 @@ export function resolveProductivity({
   fallbackProductivity: number;
 }) {
   if (historicalSamples?.length) {
-    return calculateHistoricalProductivity(historicalSamples, fallbackProductivity);
+    return calculateHistoricalProductivity(
+      historicalSamples,
+      fallbackProductivity,
+      averageProductivity,
+    );
   }
 
   if (averageProductivity && averageProductivity > 0) {

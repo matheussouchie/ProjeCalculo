@@ -4,6 +4,7 @@ import { ProfileSettingsForm } from "@/components/settings/profile-settings-form
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getPublicAvatarUrl } from "@/services/profile/avatar.service";
 
 export default async function SettingsPage() {
   const supabase = await createSupabaseServerClient();
@@ -15,7 +16,7 @@ export default async function SettingsPage() {
     supabase && user
       ? await supabase
           .from("profiles")
-          .select("name,email,created_at")
+          .select("name,email,created_at,avatar_path")
           .eq("id", user.id)
           .maybeSingle()
       : { data: null };
@@ -23,6 +24,10 @@ export default async function SettingsPage() {
   const fallbackName = String(user?.user_metadata?.name ?? "").trim();
   const name = (profile?.name ?? fallbackName) || "Usuário";
   const email = profile?.email ?? user?.email ?? "";
+  const avatarUrl =
+    supabase && profile?.avatar_path
+      ? getPublicAvatarUrl(supabase, profile.avatar_path)
+      : null;
 
   return (
     <section className="space-y-6">
@@ -46,7 +51,7 @@ export default async function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <ProfileSettingsForm name={name} email={email} />
+            <ProfileSettingsForm name={name} email={email} avatarUrl={avatarUrl} />
           </CardContent>
         </Card>
 

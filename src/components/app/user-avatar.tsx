@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import type { AppUser } from "@/types/auth";
 
 export function UserAvatar({ user }: { user: AppUser }) {
@@ -9,8 +11,19 @@ export function UserAvatar({ user }: { user: AppUser }) {
     .join("");
 
   return (
-    <div className="flex size-10 items-center justify-center rounded-full border bg-muted text-xs font-semibold text-foreground">
-      {initials || user.email[0]?.toUpperCase() || "U"}
+    <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted text-xs font-semibold text-foreground">
+      {user.avatarUrl ? (
+        <Image
+          src={user.avatarUrl}
+          alt={`Foto de ${user.name}`}
+          fill
+          sizes="40px"
+          className="object-cover"
+          unoptimized
+        />
+      ) : (
+        initials || user.email[0]?.toUpperCase() || "U"
+      )}
     </div>
   );
 }

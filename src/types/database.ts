@@ -14,17 +14,20 @@ export type Database = {
           id: string;
           name: string | null;
           email: string;
+          avatar_path: string | null;
           created_at: string;
         };
         Insert: {
           id: string;
           name?: string | null;
           email: string;
+          avatar_path?: string | null;
           created_at?: string;
         };
         Update: {
           name?: string | null;
           email?: string;
+          avatar_path?: string | null;
         };
         Relationships: [
           {
