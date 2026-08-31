@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 import {
   deleteUserRoomAction,
@@ -10,6 +10,7 @@ import {
   upsertUserRoomAction,
 } from "@/app/actions/user-rooms";
 import { Badge } from "@/components/ui/badge";
+import { ActionIcon } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -143,7 +144,7 @@ export function UserRoomsManager({ rooms }: UserRoomsManagerProps) {
                 {isSaving ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
                 ) : editingRoom ? (
-                  <Pencil aria-hidden="true" />
+                  <ActionIcon name="edit" />
                 ) : (
                   <Plus aria-hidden="true" />
                 )}
@@ -215,7 +216,7 @@ export function UserRoomsManager({ rooms }: UserRoomsManagerProps) {
                   title="Editar ambiente"
                   onClick={() => setEditingRoom(room)}
                 >
-                  <Pencil aria-hidden="true" />
+                  <ActionIcon name="edit" />
                 </Button>
                 <Button
                   type="button"
@@ -225,7 +226,7 @@ export function UserRoomsManager({ rooms }: UserRoomsManagerProps) {
                   onClick={() => deleteRoom(room.id)}
                   disabled={isDeleting}
                 >
-                  <Trash2 aria-hidden="true" />
+                  <ActionIcon name="delete" />
                 </Button>
               </div>
             </article>
@@ -240,7 +241,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-sm font-semibold">{value}</p>
+      <p className="mt-1 font-sans text-sm font-semibold">{value}</p>
     </div>
   );
 }

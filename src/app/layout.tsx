@@ -1,13 +1,14 @@
 ﻿import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Montserrat } from "next/font/google";
 
 import { Providers } from "@/app/providers";
 
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -19,6 +20,10 @@ export const metadata: Metadata = {
   title: "OnTime²",
   description:
     "Previsao de prazos para detalhamento arquitetonico com historico real de produtividade.",
+  icons: {
+    icon: "/branding/ontime-mark.png",
+    apple: "/branding/ontime-mark.png",
+  },
 };
 
 export default function RootLayout({
@@ -27,11 +32,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${geistMono.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${montserrat.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
-

@@ -18,8 +18,15 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Label htmlFor="email">E-mail</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="Seu e-mail"
+          required
+        />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
@@ -36,6 +43,7 @@ export function LoginForm() {
           name="password"
           type="password"
           autoComplete="current-password"
+          placeholder="Sua senha"
           required
         />
       </div>

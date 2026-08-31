@@ -16,10 +16,10 @@ export default async function LoginPage() {
 
   return (
     <AuthCard
-      title="Entrar"
-      description="Acesse seu workspace para acompanhar prazos e produtividade."
-      footerText="Ainda nao tem conta?"
-      footerLabel="Criar cadastro"
+      title="Realize Seu Login"
+      description="Acesse seu espaço para acompanhar prazos, produtividade e calcular novos projetos."
+      footerText="Ainda não possui conta?"
+      footerLabel="Criar Cadastro"
       footerHref="/signup"
     >
       <LoginForm />

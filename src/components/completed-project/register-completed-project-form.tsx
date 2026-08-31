@@ -4,13 +4,14 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, Loader2, Plus } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import {
   registerCompletedProjectAction,
   type CompletedProjectActionState,
 } from "@/app/actions/projects";
+import { ActionIcon } from "@/components/ui/action-icon";
 import { NotificationBanner } from "@/components/feedback/notification-banner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +87,8 @@ export function RegisterCompletedProjectForm({
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
   const watchedValues = useWatch({ control: form.control });
   const selectedEstimate = useMemo(
-    () => savedEstimates.find((estimate) => estimate.id === watchedPredictionId) ?? null,
+    () =>
+      savedEstimates.find((estimate) => estimate.id === watchedPredictionId) ?? null,
     [savedEstimates, watchedPredictionId],
   );
   const autosaveValues = useMemo(
@@ -256,8 +258,7 @@ export function RegisterCompletedProjectForm({
           <CardHeader>
             <CardTitle>Dados do projeto</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Informe o que foi entregue para o OnTime² aprender com seu ritmo
-              real.
+              Informe o que foi entregue para o OnTime² aprender com seu ritmo real.
             </p>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -418,7 +419,10 @@ export function RegisterCompletedProjectForm({
                             />
                             {form.formState.errors.rooms?.[index]?.squareMeters ? (
                               <p className="mt-1 text-xs text-destructive">
-                                {form.formState.errors.rooms[index].squareMeters.message}
+                                {
+                                  form.formState.errors.rooms[index].squareMeters
+                                    .message
+                                }
                               </p>
                             ) : null}
                           </div>
@@ -429,7 +433,7 @@ export function RegisterCompletedProjectForm({
                             onClick={() => remove(index)}
                             aria-label="Remover ambiente"
                           >
-                            <Trash2 aria-hidden="true" />
+                            <ActionIcon name="delete" />
                           </Button>
                         </div>
                       </motion.article>
@@ -507,8 +511,7 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b pb-3 last:border-b-0 last:pb-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="font-mono text-sm font-semibold">{value}</span>
+      <span className="font-sans text-sm font-semibold">{value}</span>
     </div>
   );
 }
-

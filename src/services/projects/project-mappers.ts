@@ -39,19 +39,17 @@ export function mapProjectToCompletedProjectValues(
   };
 }
 
-export function mapEstimateToCompletedProjectValues(
-  estimate: {
+export function mapEstimateToCompletedProjectValues(estimate: {
+  id: string;
+  name: string;
+  rooms: {
     id: string;
-    name: string;
-    rooms: {
-      id: string;
-      type: string;
-      roomLabel: string;
-      complexityWeight: number;
-      squareMeters: number;
-    }[];
-  },
-): CompletedProjectValues {
+    type: string;
+    roomLabel: string;
+    complexityWeight: number;
+    squareMeters: number;
+  }[];
+}): CompletedProjectValues {
   return {
     projectId: "",
     predictionId: estimate.id,

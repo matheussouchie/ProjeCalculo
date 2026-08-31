@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Copy, Pencil, Trash2 } from "lucide-react";
 
 import {
   deleteProjectAction,
@@ -11,6 +10,7 @@ import {
   type ProjectActionState,
 } from "@/app/actions/projects";
 import { Badge } from "@/components/ui/badge";
+import { ActionIcon } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AnalyticsProject } from "@/services/analytics/dashboard-analytics.service";
@@ -111,7 +111,10 @@ export function ProjectHistoryList({
                 </p>
               </div>
 
-              <Metric label="Metragem" value={`${roundToOneDecimal(project.total_square_meters)} m²`} />
+              <Metric
+                label="Metragem"
+                value={`${roundToOneDecimal(project.total_square_meters)} m²`}
+              />
               <Metric label="Previsto" value={`${getPredictedDays(project)} dias`} />
               <Metric
                 label="Real"
@@ -128,7 +131,7 @@ export function ProjectHistoryList({
                     aria-label="Editar projeto"
                   >
                     <Link href={`/registrar-projeto-concluido?projectId=${project.id}`}>
-                      <Pencil aria-hidden="true" />
+                      <ActionIcon name="edit" />
                     </Link>
                   </Button>
                   <Button
@@ -140,7 +143,7 @@ export function ProjectHistoryList({
                     onClick={() => duplicateProject(project.id)}
                     disabled={isPending}
                   >
-                    <Copy aria-hidden="true" />
+                    <ActionIcon name="copy" />
                   </Button>
                   <Button
                     type="button"
@@ -151,7 +154,7 @@ export function ProjectHistoryList({
                     onClick={() => setDeleteTarget(project)}
                     disabled={isPending}
                   >
-                    <Trash2 aria-hidden="true" />
+                    <ActionIcon name="delete" />
                   </Button>
                 </div>
               ) : null}
@@ -200,9 +203,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-sm font-semibold">{value}</p>
+      <p className="mt-1 font-sans text-sm font-semibold">{value}</p>
     </div>
   );
 }
-
-

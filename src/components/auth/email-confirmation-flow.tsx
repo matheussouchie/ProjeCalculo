@@ -62,7 +62,8 @@ export function EmailConfirmationFlow() {
         if (!isCancelled) {
           setState({
             variant: "error",
-            detail: "As variáveis de ambiente do Supabase ainda não foram configuradas.",
+            detail:
+              "As variáveis de ambiente do Supabase ainda não foram configuradas.",
           });
         }
         return;

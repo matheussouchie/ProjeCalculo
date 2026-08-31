@@ -1,7 +1,6 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -28,7 +27,7 @@ export function AuthCard({
   footerText,
 }: AuthCardProps) {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 sm:p-8 lg:p-[50px]">
       <Image
         src="/images/login-background.png"
         alt=""
@@ -37,61 +36,58 @@ export function AuthCard({
         className="object-cover"
         priority
       />
-      <div className="absolute inset-0 bg-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-white/35 via-white/10 to-background/70" />
+      <div className="absolute inset-0 bg-white/45 dark:bg-[#52395e]/45" />
 
-      <section className="relative grid w-full max-w-5xl overflow-hidden rounded-lg border border-white/20 bg-card/95 shadow-[var(--shadow-soft)] backdrop-blur-xl md:grid-cols-[1fr_420px]">
-        <div className="hidden p-8 text-foreground md:flex md:flex-col md:justify-between">
+      <section className="relative grid w-full max-w-[1400px] overflow-hidden rounded-md border border-[#80658c] bg-[#f5f1f7] shadow-[var(--shadow-soft)] lg:grid-cols-2">
+        <div className="hidden min-h-[650px] flex-col justify-between px-12 py-10 text-[#52395e] lg:flex">
           <div>
-            <div className="mb-8 flex size-12 items-center justify-center rounded-md border border-white/25 bg-white/90 p-2 shadow-[var(--shadow-card)]">
-              <Image
-                src="/branding/icon.svg"
-                alt="Ícone OnTime²"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
-                priority
-              />
-            </div>
-            <Badge className="border-white/20 bg-white/90 text-foreground">
-              OnTime²
-            </Badge>
-            <h1 className="mt-6 max-w-sm text-foreground">
+            <Image
+              src="/branding/ontime-mark.png"
+              alt="OnTime²"
+              width={2000}
+              height={2000}
+              className="size-[220px] object-contain"
+              priority
+            />
+            <h1 className="mt-8 max-w-xl text-4xl font-bold leading-[1.2]">
               Prazos precisos para projetos de detalhamento.
             </h1>
-            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-              Uma base profissional para arquitetos, designers de interiores e
-              projetistas acompanharem produtividade real.
-            </p>
           </div>
-          <p className="text-xs text-muted-foreground">OnTime² · Auth seguro</p>
+          <p className="max-w-lg text-sm leading-5">
+            Uma base profissional para arquitetos, designers de interiores e projetistas
+            acompanharem produtividade real.
+          </p>
         </div>
 
-        <Card className="rounded-none border-0 shadow-none">
-          <CardHeader>
-            <div className="mb-3 flex items-center gap-3 md:hidden">
-              <span className="flex size-10 items-center justify-center rounded-md border bg-card p-2 shadow-[var(--shadow-card)]">
+        <Card className="min-h-[620px] justify-center rounded-none border-0 bg-white px-2 py-10 shadow-none dark:bg-[#53575e] sm:px-8 lg:px-16 lg:py-[70px]">
+          <CardHeader className="px-5 sm:px-6">
+            <div className="mb-5 flex items-center gap-3 lg:hidden">
               <Image
-                  src="/branding/icon.svg"
-                  alt="Ícone OnTime²"
-                  width={24}
-                  height={24}
-                  className="h-6 w-6 object-contain"
-                  priority
-                />
+                src="/branding/ontime-mark.png"
+                alt="OnTime²"
+                width={2000}
+                height={2000}
+                className="size-16 object-contain"
+                priority
+              />
+              <span className="text-xl font-semibold text-[#52395e] dark:text-[#f5f1f7]">
+                OnTime²
               </span>
-              <Badge variant="outline">OnTime²</Badge>
             </div>
-            <CardTitle className="text-2xl">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardTitle className="text-4xl font-bold text-[#52395e] dark:text-[#f5f1f7]">
+              {title}
+            </CardTitle>
+            <CardDescription className="mt-2 text-sm leading-5">
+              {description}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
+          <CardContent className="space-y-5 px-5 sm:px-6">
             {children}
             {footerHref && footerLabel && footerText ? (
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-base text-muted-foreground">
                 {footerText}{" "}
                 <Link
-                  className="font-medium text-foreground hover:underline"
+                  className="font-semibold text-primary hover:underline dark:text-[#f0c4a3]"
                   href={footerHref}
                 >
                   {footerLabel}
@@ -104,5 +100,3 @@ export function AuthCard({
     </main>
   );
 }
-
-

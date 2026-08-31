@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { CheckCircle2, Loader2, Plus, Sparkles } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import {
@@ -12,6 +12,7 @@ import {
   type SavedEstimateActionState,
 } from "@/app/actions/projects";
 import { SavedEstimatesList } from "@/components/calculator/saved-estimates-list";
+import { ActionIcon } from "@/components/ui/action-icon";
 import { NotificationBanner } from "@/components/feedback/notification-banner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -409,7 +410,7 @@ export function DeadlineCalculator({
                               title="Remover ambiente"
                               aria-label="Remover ambiente"
                             >
-                              <Trash2 aria-hidden="true" />
+                              <ActionIcon name="delete" />
                             </Button>
                           </div>
                         </motion.article>
@@ -626,7 +627,7 @@ function SideMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b pb-3 last:border-b-0 last:pb-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="font-mono text-sm font-semibold">{value}</span>
+      <span className="font-sans text-sm font-semibold">{value}</span>
     </div>
   );
 }
@@ -635,7 +636,7 @@ function ResultPill({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border bg-card p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono font-semibold">{value}</p>
+      <p className="mt-1 font-sans font-semibold">{value}</p>
     </div>
   );
 }

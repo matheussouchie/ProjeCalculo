@@ -925,5 +925,3 @@ export async function duplicateProjectAction(
     message: notificationMessages.duplicated,
   };
 }
-
-

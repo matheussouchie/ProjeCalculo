@@ -42,4 +42,3 @@ export const INITIAL_PRODUCTIVITY_BASE = {
   completedProjects: 1,
   historicalAccuracy: 0.86,
 };
-

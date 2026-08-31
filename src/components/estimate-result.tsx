@@ -36,7 +36,7 @@ export function EstimateResult({ estimate }: { estimate: ProjectEstimate }) {
               <div key={environment.id} className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span>{environment.name}</span>
-                  <span className="font-mono text-muted-foreground">
+                  <span className="font-sans text-muted-foreground">
                     {environment.estimatedDays}d
                   </span>
                 </div>
@@ -85,7 +85,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md bg-background p-3 text-center">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-lg font-semibold">{value}</p>
+      <p className="mt-1 font-sans text-lg font-semibold">{value}</p>
     </div>
   );
 }

@@ -12,9 +12,9 @@ type AnalyticsMetricCardProps = {
 };
 
 const toneClasses = {
-  neutral: "bg-primary/5 text-primary",
-  success: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  warning: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  neutral: "bg-accent text-accent-foreground",
+  success: "bg-success/20 text-foreground dark:text-card-foreground",
+  warning: "bg-warning/20 text-foreground dark:text-card-foreground",
 };
 
 export function AnalyticsMetricCard({
@@ -29,12 +29,12 @@ export function AnalyticsMetricCard({
       <CardContent className="flex items-start justify-between gap-4 p-6">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="mt-4 text-[32px] font-semibold tracking-[-0.04em]">{value}</p>
+          <p className="mt-4 text-[30px] font-semibold tracking-normal">{value}</p>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{description}</p>
         </div>
         <div
           className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-md",
+            "flex size-12 shrink-0 items-center justify-center rounded-md",
             toneClasses[tone],
           )}
         >

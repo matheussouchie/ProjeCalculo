@@ -8,7 +8,13 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type EmailConfirmationScreenProps = {
@@ -21,8 +27,7 @@ const contentByVariant = {
     title: "Confirmando sua conta...",
     description: "Estamos validando seu cadastro.",
     icon: Loader2,
-    iconClassName:
-      "border-border/60 bg-muted text-muted-foreground animate-spin",
+    iconClassName: "border-border/60 bg-muted text-muted-foreground animate-spin",
     actionLabel: null,
     message: null,
   },
@@ -37,11 +42,9 @@ const contentByVariant = {
   },
   error: {
     title: "Não foi possível confirmar sua conta",
-    description:
-      "O link pode ter expirado ou já ter sido utilizado.",
+    description: "O link pode ter expirado ou já ter sido utilizado.",
     icon: AlertCircle,
-    iconClassName:
-      "border-destructive/20 bg-destructive/10 text-destructive",
+    iconClassName: "border-destructive/20 bg-destructive/10 text-destructive",
     actionLabel: "Voltar para Login",
     message: null,
   },
@@ -87,8 +90,8 @@ export function EmailConfirmationScreen({
               Seu acesso está sendo validado com segurança.
             </h1>
             <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-              Mantemos a experiência simples, profissional e protegida para que
-              você retome seu trabalho sem atrito.
+              Mantemos a experiência simples, profissional e protegida para que você
+              retome seu trabalho sem atrito.
             </p>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -132,13 +135,17 @@ export function EmailConfirmationScreen({
               className={cn(
                 "rounded-[16px] border p-5",
                 variant === "loading" && "border-border/60 bg-muted/40",
-                variant === "success" &&
-                  "border-emerald-500/20 bg-emerald-500/5",
+                variant === "success" && "border-emerald-500/20 bg-emerald-500/5",
                 variant === "error" && "border-destructive/20 bg-destructive/5",
               )}
             >
               <div className="flex items-start gap-4">
-                <span className={cn("flex size-11 items-center justify-center rounded-full border", content.iconClassName)}>
+                <span
+                  className={cn(
+                    "flex size-11 items-center justify-center rounded-full border",
+                    content.iconClassName,
+                  )}
+                >
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
                 <div className="space-y-2">
@@ -153,7 +160,8 @@ export function EmailConfirmationScreen({
                     {variant === "loading"
                       ? "A confirmação acontece em segundo plano. Se o link estiver válido, o acesso será liberado automaticamente."
                       : variant === "error"
-                        ? detail ?? "Abra novamente o link mais recente enviado para o seu e-mail."
+                        ? (detail ??
+                          "Abra novamente o link mais recente enviado para o seu e-mail.")
                         : content.description}
                   </p>
                 </div>
@@ -176,4 +184,3 @@ export function EmailConfirmationScreen({
     </main>
   );
 }
-

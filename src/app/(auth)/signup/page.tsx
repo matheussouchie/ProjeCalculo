@@ -16,9 +16,9 @@ export default async function SignupPage() {
 
   return (
     <AuthCard
-      title="Criar conta"
-      description="Cadastre seu studio e comece com uma base inicial de produtividade."
-      footerText="Ja tem conta?"
+      title="Realize Seu Cadastro"
+      description="Crie seu espaço e comece a acompanhar prazos e produtividade."
+      footerText="Já possui conta?"
       footerLabel="Entrar"
       footerHref="/login"
     >

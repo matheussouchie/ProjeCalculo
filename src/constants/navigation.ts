@@ -1,50 +1,23 @@
-import {
-  BarChart3,
-  Calculator,
-  Layers3,
-  FolderKanban,
-  Home,
-  Settings,
-  type LucideIcon,
-} from "lucide-react";
+export type NavigationIconName =
+  | "dashboard"
+  | "calculator"
+  | "rooms"
+  | "projects"
+  | "settings";
 
 export type AppNavigationItem = {
   title: string;
   href: string;
-  icon: LucideIcon;
+  icon: NavigationIconName;
 };
 
 export const appNavigationItems: AppNavigationItem[] = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Calcular Prazo",
-    href: "/calcular-prazo",
-    icon: Calculator,
-  },
-  {
-    title: "Ambientes",
-    href: "/ambientes",
-    icon: Layers3,
-  },
-  {
-    title: "Projetos",
-    href: "/projetos",
-    icon: FolderKanban,
-  },
-  {
-    title: "Estatisticas",
-    href: "/estatisticas",
-    icon: BarChart3,
-  },
-  {
-    title: "Configuracoes",
-    href: "/configuracoes",
-    icon: Settings,
-  },
+  { title: "Dashboard", href: "/dashboard", icon: "dashboard" },
+  { title: "Calcular Prazo", href: "/calcular-prazo", icon: "calculator" },
+  { title: "Ambientes", href: "/ambientes", icon: "rooms" },
+  { title: "Projetos", href: "/projetos", icon: "projects" },
+  { title: "Estatísticas", href: "/estatisticas", icon: "dashboard" },
+  { title: "Configurações", href: "/configuracoes", icon: "settings" },
 ];
 
 export function getNavigationTitle(pathname: string) {

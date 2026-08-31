@@ -14,11 +14,11 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
-        <AppSidebar user={user} />
+      <div className="mx-auto flex min-h-screen w-full max-w-[1512px] overflow-hidden bg-background shadow-[var(--shadow-soft)]">
+        <AppSidebar />
         <div className="min-w-0 flex-1">
           <AppHeader user={user} themePreference={themePreference} />
-          <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+          <main className="px-4 py-7 sm:px-7 lg:px-10 lg:py-10">{children}</main>
         </div>
       </div>
     </div>

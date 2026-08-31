@@ -2,26 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
 
-import { signOutAction } from "@/app/actions/auth";
 import { AppLogo } from "@/components/app/app-logo";
-import { UserAvatar } from "@/components/app/user-avatar";
-import { Button } from "@/components/ui/button";
+import { DesignIcon } from "@/components/app/design-icon";
 import { appNavigationItems } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
-import type { AppUser } from "@/types/auth";
 
-export function AppSidebar({ user }: { user: AppUser }) {
+export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-[280px] shrink-0 border-r bg-background/70 p-5 lg:flex lg:min-h-screen lg:flex-col">
-      <AppLogo />
+    <aside className="sticky top-0 hidden h-screen w-[245px] shrink-0 bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+      <AppLogo className="h-[120px]" />
 
-      <nav className="mt-10 space-y-1">
+      <nav
+        className="mt-3 flex flex-col gap-[15px] px-3"
+        aria-label="Navegação principal"
+      >
         {appNavigationItems.map((item) => {
-          const Icon = item.icon;
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -29,34 +27,20 @@ export function AppSidebar({ user }: { user: AppUser }) {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex h-11 items-center gap-3 rounded-sm px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "flex h-[54px] items-center gap-[10px] rounded-md px-5 text-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 isActive &&
-                  "bg-card text-foreground shadow-[var(--shadow-card)] ring-1 ring-border",
+                  "bg-sidebar-accent text-sidebar-accent-foreground shadow-[var(--shadow-card)]",
               )}
             >
-              <Icon className="size-4" aria-hidden="true" />
-              {item.title}
+              <DesignIcon name={item.icon} />
+              <span className="truncate">{item.title}</span>
             </Link>
           );
         })}
       </nav>
-
-      <div className="mt-auto rounded-md border bg-card p-3 shadow-[var(--shadow-card)]">
-        <div className="flex items-center gap-3">
-          <UserAvatar user={user} />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{user.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-          </div>
-        </div>
-        <form action={signOutAction} className="mt-4">
-          <Button variant="outline" className="w-full justify-start" size="sm">
-            <LogOut aria-hidden="true" />
-            Sair
-          </Button>
-        </form>
-      </div>
     </aside>
   );
 }

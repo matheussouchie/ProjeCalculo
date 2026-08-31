@@ -1,18 +1,26 @@
-﻿import Image from "next/image";
+import Image from "next/image";
+import Link from "next/link";
 
-export function AppLogo() {
+import { cn } from "@/lib/utils";
+
+export function AppLogo({ className }: { className?: string }) {
   return (
-    <div className="min-w-0">
+    <Link
+      href="/dashboard"
+      className={cn(
+        "flex w-full items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
+      aria-label="Ir para o Dashboard do OnTime²"
+    >
       <Image
-        src="/branding/logo.svg"
+        src="/branding/ontime-mark.png"
         alt="OnTime²"
-        width={170}
-        height={32}
-        className="h-8 w-auto max-w-[170px] object-contain object-left"
+        width={2000}
+        height={2000}
+        className="size-[92px] object-contain"
         priority
       />
-      <p className="mt-2 text-xs text-muted-foreground">Prazos profissionais</p>
-    </div>
+    </Link>
   );
 }
-

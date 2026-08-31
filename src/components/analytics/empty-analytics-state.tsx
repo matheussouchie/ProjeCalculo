@@ -13,8 +13,8 @@ export function EmptyAnalyticsState() {
         </div>
         <h3 className="mt-6">Dados em formação</h3>
         <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-          Registre projetos concluídos para o OnTime² aprender sua produtividade
-          real e montar gráficos mais precisos.
+          Registre projetos concluídos para o OnTime² aprender sua produtividade real e
+          montar gráficos mais precisos.
         </p>
         <Button asChild className="mt-6">
           <Link href="/registrar-projeto-concluido">Registrar Projeto Concluído</Link>
@@ -23,4 +23,3 @@ export function EmptyAnalyticsState() {
     </Card>
   );
 }
-

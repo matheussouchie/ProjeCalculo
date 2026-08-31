@@ -5,22 +5,25 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium outline-none transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent text-base font-semibold outline-none transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 focus-visible:ring-[3px] focus-visible:ring-ring/40 active:translate-y-px",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+        default:
+          "border-[#a18ba8] bg-primary text-primary-foreground shadow-[var(--shadow-card)] hover:bg-[#e8a06d] dark:hover:bg-[#e5b08a]",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "bg-secondary text-secondary-foreground shadow-[var(--shadow-card)] hover:bg-secondary/85",
+        ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border-border bg-card text-foreground shadow-[var(--shadow-card)] hover:border-primary hover:bg-accent hover:text-accent-foreground",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-[var(--shadow-card)] hover:bg-destructive/85",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-sm px-3",
-        lg: "h-10 rounded-md px-6",
-        icon: "size-9",
+        default: "h-[46px] px-5 py-[11px]",
+        sm: "h-10 px-4 text-sm",
+        lg: "h-12 px-7 text-lg",
+        icon: "size-11 p-0",
       },
     },
     defaultVariants: {

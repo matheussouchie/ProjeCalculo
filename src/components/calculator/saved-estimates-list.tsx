@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Pencil, Trash2 } from "lucide-react";
 
 import {
   deleteEstimateAction,
   duplicateEstimateAction,
   type SavedEstimateActionState,
 } from "@/app/actions/projects";
+import { ActionIcon } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SavedEstimate } from "@/services/estimates/estimate-mappers";
@@ -105,7 +105,7 @@ export function SavedEstimatesList({ estimates, onEdit }: SavedEstimatesListProp
                   onClick={() => onEdit(estimate)}
                   disabled={isPending}
                 >
-                  <Pencil aria-hidden="true" />
+                  <ActionIcon name="edit" />
                 </Button>
                 <Button
                   type="button"
@@ -115,7 +115,7 @@ export function SavedEstimatesList({ estimates, onEdit }: SavedEstimatesListProp
                   onClick={() => duplicateEstimate(estimate.id)}
                   disabled={isPending}
                 >
-                  <Copy aria-hidden="true" />
+                  <ActionIcon name="copy" />
                 </Button>
                 <Button
                   type="button"
@@ -125,7 +125,7 @@ export function SavedEstimatesList({ estimates, onEdit }: SavedEstimatesListProp
                   onClick={() => deleteEstimate(estimate.id)}
                   disabled={isPending}
                 >
-                  <Trash2 aria-hidden="true" />
+                  <ActionIcon name="delete" />
                 </Button>
               </div>
             </article>
@@ -140,7 +140,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-sm font-semibold">{value}</p>
+      <p className="mt-1 font-sans text-sm font-semibold">{value}</p>
     </div>
   );
 }

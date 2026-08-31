@@ -22,8 +22,8 @@ export default async function DashboardPage() {
         <div className="max-w-3xl">
           <h2 className="mt-4">Visão geral</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Acompanhe produtividade, precisão e histórico para entender como o
-            OnTime² está aprendendo com seus projetos concluídos.
+            Acompanhe produtividade, precisão e histórico para entender como o OnTime²
+            está aprendendo com seus projetos concluídos.
           </p>
         </div>
         <Button asChild>
@@ -91,4 +91,3 @@ export default async function DashboardPage() {
     </section>
   );
 }
-

@@ -85,7 +85,7 @@ export function ProfileSettingsForm({
     setPreviewUrl(URL.createObjectURL(file));
   }
 
-  const displayedAvatarUrl = selectedFile ? previewUrl : avatarUrl ?? null;
+  const displayedAvatarUrl = selectedFile ? previewUrl : (avatarUrl ?? null);
 
   return (
     <div className="space-y-8">

@@ -47,11 +47,24 @@ export function SignupForm() {
     <form action={formAction} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Nome</Label>
-        <Input id="name" name="name" autoComplete="name" required />
+        <Input
+          id="name"
+          name="name"
+          autoComplete="name"
+          placeholder="Seu nome"
+          required
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Label htmlFor="email">E-mail</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="Seu e-mail"
+          required
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Senha</Label>
@@ -60,6 +73,7 @@ export function SignupForm() {
           name="password"
           type="password"
           autoComplete="new-password"
+          placeholder="Crie uma senha"
           minLength={6}
           required
         />

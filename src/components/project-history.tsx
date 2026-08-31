@@ -38,7 +38,7 @@ export function ProjectHistory({ projects }: { projects: HistoricalProject[] }) 
                   {statusLabels[project.status]}
                 </Badge>
                 {project.actualDays ? (
-                  <span className="font-mono text-sm text-muted-foreground">
+                  <span className="font-sans text-sm text-muted-foreground">
                     real {project.actualDays}d
                   </span>
                 ) : null}

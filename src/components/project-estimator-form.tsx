@@ -3,7 +3,7 @@
 import { useState, useTransition, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Calculator, Loader2, Plus, Trash2 } from "lucide-react";
+import { Calculator, Loader2, Plus } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import {
@@ -11,6 +11,7 @@ import {
   type EstimateActionState,
 } from "@/app/actions/projects";
 import { EstimateResult } from "@/components/estimate-result";
+import { ActionIcon } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -113,7 +114,7 @@ export function ProjectEstimatorForm({
               </Field>
               <div className="rounded-lg border bg-muted/40 p-3">
                 <p className="text-xs text-muted-foreground">Metragem total</p>
-                <p className="mt-1 font-mono text-2xl font-semibold">
+                <p className="mt-1 font-sans text-2xl font-semibold">
                   {Number.isFinite(totalSquareMeters) ? totalSquareMeters : 0} m2
                 </p>
               </div>
@@ -188,7 +189,7 @@ export function ProjectEstimatorForm({
                           disabled={fields.length === 1}
                           onClick={() => remove(index)}
                         >
-                          <Trash2 aria-hidden="true" />
+                          <ActionIcon name="delete" />
                         </Button>
                       </div>
                     </div>

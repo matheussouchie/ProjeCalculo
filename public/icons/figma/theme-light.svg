@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="floor_lamp">
+<mask id="mask0_0_15" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+<rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_0_15)">
+<path id="floor_lamp_2" d="M11 19V11H6C5.66667 11 5.4 10.8667 5.2 10.6C5 10.3333 4.95 10.0333 5.05 9.7L7 3.4C7.13333 2.98333 7.375 2.64583 7.725 2.3875C8.075 2.12917 8.46667 2 8.9 2H15.1C15.5333 2 15.925 2.12917 16.275 2.3875C16.625 2.64583 16.8667 2.98333 17 3.4L18.95 9.7C19.05 10.0333 19 10.3333 18.8 10.6C18.6 10.8667 18.3333 11 18 11H13V19H11ZM7.35 9H16.65L15.1 4H8.9L7.35 9ZM8 22V20H16V22H8Z" fill="white"/>
+</g>
+</g>
+</svg>

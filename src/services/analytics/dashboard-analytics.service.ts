@@ -18,9 +18,11 @@ export type AnalyticsProject = Pick<
   | "updated_at"
   | "completed_at"
 > & {
-  prediction?: {
-    predicted_days: number;
-  }[] | null;
+  prediction?:
+    | {
+        predicted_days: number;
+      }[]
+    | null;
 };
 
 export type AnalyticsTrendPoint = {
@@ -66,14 +68,14 @@ function getProjectDate(project: AnalyticsProject) {
 }
 
 function getErrorPercent(project: AnalyticsProject) {
-  const predictedDays = project.prediction?.[0]?.predicted_days ?? project.predicted_days;
+  const predictedDays =
+    project.prediction?.[0]?.predicted_days ?? project.predicted_days;
 
   if (!project.actual_days || predictedDays <= 0) {
     return 0;
   }
 
-  const errorRatio =
-    Math.abs(project.actual_days - predictedDays) / predictedDays;
+  const errorRatio = Math.abs(project.actual_days - predictedDays) / predictedDays;
 
   return roundToOneDecimal(errorRatio * 100);
 }
@@ -117,7 +119,8 @@ export function buildDashboardAnalytics(
 
   const productivityTrend = completedProjects.map((project) => {
     const actualDays = project.actual_days ?? 1;
-    const predictedDays = project.prediction?.[0]?.predicted_days ?? project.predicted_days;
+    const predictedDays =
+      project.prediction?.[0]?.predicted_days ?? project.predicted_days;
     const projectDate = getProjectDate(project);
 
     return {

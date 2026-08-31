@@ -18,8 +18,9 @@ export default async function RegisterCompletedProjectPage({
   const projectId = Array.isArray(rawProjectId)
     ? rawProjectId[0]?.trim()
     : rawProjectId?.trim();
-  const initialProject =
-    projectId ? await getCurrentUserProjectForEditing(projectId) : null;
+  const initialProject = projectId
+    ? await getCurrentUserProjectForEditing(projectId)
+    : null;
   const draft = projectId
     ? null
     : await getCurrentUserDraft<CompletedProjectValues>("completed_project");
@@ -44,4 +45,3 @@ export default async function RegisterCompletedProjectPage({
     </section>
   );
 }
-

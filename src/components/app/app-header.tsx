@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 
+import { signOutAction } from "@/app/actions/auth";
 import { AppLogo } from "@/components/app/app-logo";
+import { DesignIcon } from "@/components/app/design-icon";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -24,38 +26,41 @@ export function AppHeader({
   const title = getNavigationTitle(pathname);
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur-xl">
-      <div className="flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            Workspace
-          </p>
-          <h1 className="mt-1 truncate">{title}</h1>
-        </div>
+    <header className="sticky top-0 z-20 bg-sidebar text-sidebar-foreground shadow-[var(--shadow-card)]">
+      <div className="flex h-[104px] items-center justify-between gap-5 px-4 sm:px-7 lg:px-[42px]">
+        <h1 className="truncate">{title}</h1>
 
-        <div className="hidden items-center gap-3 sm:flex">
+        <div className="hidden items-center gap-5 sm:flex">
           <ThemeToggle initialTheme={themePreference} />
-          <div className="text-right">
-            <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+          <div className="max-w-[260px] text-right">
+            <p className="truncate text-sm font-semibold">{user.name}</p>
+            <p className="truncate text-xs text-muted-foreground dark:text-[#dddade]">
+              {user.email}
+            </p>
           </div>
           <UserAvatar user={user} />
+          <form action={signOutAction}>
+            <Button variant="secondary">Sair</Button>
+          </form>
         </div>
 
-        <details className="relative sm:hidden">
+        <details className="group relative sm:hidden">
           <summary className="list-none">
-            <Button variant="outline" size="icon" aria-label="Abrir menu">
+            <Button variant="secondary" size="icon" aria-label="Abrir menu">
               <Menu aria-hidden="true" />
             </Button>
           </summary>
-          <div className="absolute right-0 mt-3 w-[min(320px,calc(100vw-32px))] rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)]">
-            <AppLogo />
-            <div className="mt-4">
+          <div className="absolute right-0 mt-3 w-[min(340px,calc(100vw-32px))] rounded-md border bg-card p-4 text-card-foreground shadow-[var(--shadow-soft)]">
+            <AppLogo className="h-24" />
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-md bg-muted p-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{user.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
               <ThemeToggle initialTheme={themePreference} />
             </div>
-            <nav className="mt-5 space-y-1">
+            <nav className="mt-5 flex flex-col gap-2" aria-label="Navegação móvel">
               {appNavigationItems.map((item) => {
-                const Icon = item.icon;
                 const isActive =
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -63,17 +68,24 @@ export function AppHeader({
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "flex h-11 items-center gap-3 rounded-sm px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
-                      isActive && "bg-muted text-foreground",
+                      "flex h-12 items-center gap-3 rounded-md px-4 font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                      isActive && "bg-accent text-accent-foreground",
                     )}
                   >
-                    <Icon className="size-4" aria-hidden="true" />
+                    <DesignIcon name={item.icon} />
                     {item.title}
                   </Link>
                 );
               })}
             </nav>
+            <form action={signOutAction} className="mt-4">
+              <Button variant="secondary" className="w-full">
+                <LogOut aria-hidden="true" />
+                Sair
+              </Button>
+            </form>
           </div>
         </details>
       </div>
