@@ -19,6 +19,72 @@ export type ProfileActionState = {
   message?: string;
 };
 
+export async function updateProfileSettingsAction(
+  _state: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> {
+  const profile = profileSettingsSchema.safeParse({
+    name: String(formData.get("name") ?? ""),
+  });
+  const email = emailSettingsSchema.safeParse({
+    email: String(formData.get("email") ?? ""),
+  });
+  const password = String(formData.get("password") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+
+  if (!profile.success) return { ok: false, message: profile.error.issues[0]?.message };
+  if (!email.success) return { ok: false, message: email.error.issues[0]?.message };
+
+  if (password || confirmation) {
+    const parsedPassword = passwordSettingsSchema.safeParse({ password, confirmation });
+    if (!parsedPassword.success)
+      return { ok: false, message: parsedPassword.error.issues[0]?.message };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  if (!supabase)
+    return {
+      ok: false,
+      message: "Configure as variáveis do Supabase para atualizar o perfil.",
+    };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Sessão expirada. Entre novamente." };
+
+  const authUpdates: { email?: string; password?: string } = {};
+  if (email.data.email !== user.email) authUpdates.email = email.data.email;
+  if (password) authUpdates.password = password;
+
+  if (Object.keys(authUpdates).length > 0) {
+    const { error } = await supabase.auth.updateUser(authUpdates);
+    if (error)
+      return { ok: false, message: "Não foi possível atualizar os dados de acesso." };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ name: profile.data.name })
+    .eq("id", user.id);
+  if (error)
+    return { ok: false, message: "Não foi possível atualizar o perfil agora." };
+
+  revalidatePath("/configuracoes");
+  revalidatePath("/dashboard");
+  revalidatePath("/projetos");
+  revalidatePath("/estatisticas");
+  revalidatePath("/calcular-prazo");
+  revalidatePath("/registrar-projeto-concluido");
+
+  return {
+    ok: true,
+    message: authUpdates.email
+      ? "Alterações salvas. Confirme o novo e-mail pela mensagem enviada."
+      : "Alterações salvas com sucesso.",
+  };
+}
+
 export async function updateProfileAction(
   _state: ProfileActionState,
   formData: FormData,

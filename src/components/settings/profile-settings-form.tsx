@@ -1,17 +1,14 @@
 "use client";
 
-import Image from "next/image";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Save } from "lucide-react";
 
 import {
   type ProfileActionState,
-  removeAvatarAction,
-  updateAccountPasswordAction,
-  updateEmailAction,
-  updateProfileAction,
+  updateProfileSettingsAction,
 } from "@/app/actions/profile";
+import { UserAvatar } from "@/components/app/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,9 +19,7 @@ type ProfileSettingsFormProps = {
   avatarUrl?: string | null;
 };
 
-const initialState: ProfileActionState = {
-  ok: false,
-};
+const initialState: ProfileActionState = { ok: false };
 
 export function ProfileSettingsForm({
   name,
@@ -32,204 +27,114 @@ export function ProfileSettingsForm({
   avatarUrl,
 }: ProfileSettingsFormProps) {
   const router = useRouter();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(avatarUrl ?? null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [avatarError, setAvatarError] = useState<string | null>(null);
   const [state, formAction, isPending] = useActionState(
-    updateProfileAction,
-    initialState,
-  );
-  const [emailState, emailAction, isEmailPending] = useActionState(
-    updateEmailAction,
-    initialState,
-  );
-  const [passwordState, passwordAction, isPasswordPending] = useActionState(
-    updateAccountPasswordAction,
-    initialState,
-  );
-  const [removeState, removeFormAction, isRemovePending] = useActionState(
-    removeAvatarAction,
+    updateProfileSettingsAction,
     initialState,
   );
 
   useEffect(() => {
-    if (state.ok || removeState.ok) {
-      router.refresh();
-    }
-  }, [removeState.ok, router, state.ok]);
-
-  function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0] ?? null;
-    setAvatarError(null);
-
-    if (!file) {
-      setSelectedFile(null);
-      return;
-    }
-
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setSelectedFile(null);
-      setAvatarError("Use uma imagem JPEG, PNG ou WebP.");
-      event.target.value = "";
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setSelectedFile(null);
-      setAvatarError("A imagem deve ter no máximo 5 MB.");
-      event.target.value = "";
-      return;
-    }
-
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-  }
-
-  const displayedAvatarUrl = selectedFile ? previewUrl : (avatarUrl ?? null);
+    if (state.ok) router.refresh();
+  }, [router, state.ok]);
 
   return (
-    <div className="space-y-8">
-      <form action={formAction} className="space-y-5">
-        <div className="space-y-3">
-          <Label htmlFor="avatar">Foto de perfil</Label>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted text-lg font-semibold text-foreground">
-              {displayedAvatarUrl ? (
-                <Image
-                  src={displayedAvatarUrl}
-                  alt="Prévia da foto de perfil"
-                  fill
-                  sizes="64px"
-                  className="object-cover"
-                  unoptimized
-                />
-              ) : (
-                name.slice(0, 1).toUpperCase() || "U"
-              )}
-            </div>
-            <div className="min-w-56 flex-1 space-y-2">
-              <Input
-                id="avatar"
-                name="avatar"
-                type="file"
-                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                onChange={handleAvatarChange}
-                disabled={isPending}
-                className="cursor-pointer"
-              />
-              <p className="text-xs text-muted-foreground">
-                JPEG, PNG ou WebP. Tamanho máximo de 5 MB.
-              </p>
-            </div>
-          </div>
-          {avatarError ? (
-            <p className="text-sm text-destructive">{avatarError}</p>
-          ) : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome exibido</Label>
-          <Input id="name" name="name" defaultValue={name} disabled={isPending} />
-        </div>
-
-        <StatusMessage state={state} />
-
-        <Button type="submit" disabled={isPending}>
-          {isPending ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Save aria-hidden="true" />
-          )}
-          Atualizar perfil
-        </Button>
-      </form>
-
-      {avatarUrl ? (
-        <form action={removeFormAction} className="-mt-4">
-          <Button
-            type="submit"
-            variant="ghost"
-            size="sm"
-            disabled={isRemovePending || isPending}
-          >
-            {isRemovePending ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : null}
-            Remover foto
-          </Button>
-          <StatusMessage state={removeState} />
-        </form>
-      ) : null}
-
-      <form action={emailAction} className="space-y-5 border-t pt-6">
-        <div className="space-y-2">
-          <Label htmlFor="email">Alterar email</Label>
+    <form
+      action={formAction}
+      className="w-full rounded-[10px] bg-[#f5f1f7] px-5 py-[30px] shadow-[var(--shadow-card)] dark:bg-[#80658c]"
+    >
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="space-y-5">
+          <Label htmlFor="name" className="text-lg">
+            Nome Exibido
+          </Label>
           <Input
-            id="email"
-            name="email"
-            type="email"
-            defaultValue={email}
-            disabled={isEmailPending}
+            id="name"
+            name="name"
+            defaultValue={name}
+            disabled={isPending}
+            className="bg-transparent font-bold shadow-none dark:bg-transparent"
           />
         </div>
-
-        <StatusMessage state={emailState} />
-
-        <Button type="submit" variant="outline" disabled={isEmailPending}>
-          {isEmailPending ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : null}
-          Solicitar alteração de email
-        </Button>
-      </form>
-
-      <form action={passwordAction} className="space-y-5 border-t pt-6">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="password">Nova senha</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              minLength={6}
-              disabled={isPasswordPending}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmation">Confirmar senha</Label>
-            <Input
-              id="confirmation"
-              name="confirmation"
-              type="password"
-              minLength={6}
-              disabled={isPasswordPending}
-            />
-          </div>
+        <div className="flex min-h-[150px] items-center justify-center">
+          <UserAvatar
+            user={{ id: "settings-profile", name, email, avatarUrl }}
+            className="size-[150px] border-0 text-3xl shadow-[var(--shadow-card)]"
+          />
         </div>
+      </div>
 
-        <StatusMessage state={passwordState} />
+      <div className="my-5 border-t border-[#c5b7c9]" />
 
-        <Button type="submit" variant="outline" disabled={isPasswordPending}>
-          {isPasswordPending ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : null}
-          Alterar senha
-        </Button>
-      </form>
-    </div>
+      <div className="space-y-5">
+        <Label htmlFor="email" className="text-lg">
+          Alterar e-mail
+        </Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          defaultValue={email}
+          disabled={isPending}
+          className="bg-transparent font-bold shadow-none dark:bg-transparent"
+        />
+      </div>
+
+      <div className="my-5 border-t border-[#c5b7c9]" />
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="space-y-4">
+          <Label htmlFor="password" className="text-lg">
+            Nova Senha
+          </Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            minLength={6}
+            autoComplete="new-password"
+            disabled={isPending}
+            className="bg-transparent font-bold shadow-none dark:bg-transparent"
+          />
+        </div>
+        <div className="space-y-4">
+          <Label htmlFor="confirmation" className="text-lg">
+            Confirmar Senha
+          </Label>
+          <Input
+            id="confirmation"
+            name="confirmation"
+            type="password"
+            minLength={6}
+            autoComplete="new-password"
+            disabled={isPending}
+            className="bg-transparent font-bold shadow-none dark:bg-transparent"
+          />
+        </div>
+      </div>
+
+      <StatusMessage state={state} />
+
+      <Button type="submit" disabled={isPending} className="mt-5 w-full">
+        {isPending ? (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        ) : (
+          <Save aria-hidden="true" />
+        )}
+        Salvar Alterações no Perfil
+      </Button>
+    </form>
   );
 }
 
 function StatusMessage({ state }: { state: ProfileActionState }) {
-  if (!state.message) {
-    return null;
-  }
+  if (!state.message) return null;
 
   return (
     <p
+      role="status"
       className={
         state.ok
-          ? "text-sm text-emerald-700 dark:text-emerald-300"
-          : "text-sm text-destructive"
+          ? "mt-5 text-sm text-emerald-700 dark:text-emerald-200"
+          : "mt-5 text-sm text-destructive"
       }
     >
       {state.message}
