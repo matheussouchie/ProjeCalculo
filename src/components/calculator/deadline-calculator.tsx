@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Loader2, Plus, Sparkles } from "lucide-react";
+import { CheckCircle2, Loader2, Plus, Sparkles, X } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import {
@@ -556,17 +556,57 @@ export function DeadlineCalculator({
       <SavedEstimatesList estimates={savedEstimates} onEdit={editEstimate} />
 
       {showSaveDialog && estimate ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 backdrop-blur-sm">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 backdrop-blur-sm"
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && !isSaving) {
+              setShowSaveDialog(false);
+            }
+          }}
+        >
+          <button
+            type="button"
+            className="absolute inset-0"
+            onClick={() => setShowSaveDialog(false)}
+            disabled={isSaving}
+            aria-label="Fechar ao clicar fora da janela"
+            tabIndex={-1}
+          />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="save-estimate-title"
-            className="w-full max-w-md rounded-lg border bg-card p-6 shadow-[var(--shadow-soft)]"
+            aria-describedby="save-estimate-description"
+            className="relative z-10 w-full max-w-md rounded-lg border bg-card p-6 pr-14 shadow-[var(--shadow-soft)]"
           >
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-3 top-3"
+              onClick={() => setShowSaveDialog(false)}
+              disabled={isSaving}
+              aria-label="Fechar janela de salvamento"
+              title="Fechar"
+              autoFocus
+            >
+              <X aria-hidden="true" />
+            </Button>
             <h3 id="save-estimate-title">Deseja salvar esta estimativa?</h3>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p
+              id="save-estimate-description"
+              className="mt-2 text-sm leading-6 text-muted-foreground"
+            >
               Ela ficará disponível no histórico para editar, duplicar ou excluir.
             </p>
+            {!saveState.ok && saveState.message ? (
+              <p
+                role="alert"
+                className="mt-4 rounded-sm border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              >
+                {saveState.message}
+              </p>
+            ) : null}
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button
                 type="button"

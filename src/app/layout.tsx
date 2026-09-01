@@ -21,7 +21,13 @@ export const metadata: Metadata = {
   description:
     "Previsao de prazos para detalhamento arquitetonico com historico real de produtividade.",
   icons: {
-    icon: "/branding/ontime-mark.png",
+    icon: [
+      {
+        url: "/branding/ontime-mark.png",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/branding/ontime-mark.png",
     apple: "/branding/ontime-mark.png",
   },
 };

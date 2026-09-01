@@ -36,7 +36,17 @@ export function AppHeader({
             <p className="truncate text-lg font-semibold leading-none">{user.name}</p>
             <p className="mt-1 truncate text-xs text-current">{user.email}</p>
           </div>
-          <UserAvatar user={user} className="size-16 border-[3px] border-[#a18ba8]" />
+          <Link
+            href="/configuracoes"
+            aria-label="Abrir configurações do usuário"
+            title="Configurações do usuário"
+            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          >
+            <UserAvatar
+              user={user}
+              className="size-16 border-[3px] border-[#a18ba8] transition-opacity hover:opacity-85"
+            />
+          </Link>
           <form action={signOutAction}>
             <Button variant="secondary">Sair</Button>
           </form>
@@ -55,6 +65,14 @@ export function AppHeader({
           <div className="absolute right-0 mt-3 w-[min(340px,calc(100vw-32px))] rounded-md border bg-card p-4 text-card-foreground shadow-[var(--shadow-soft)]">
             <AppLogo className="h-24" />
             <div className="mt-4 flex items-center justify-between gap-3 rounded-md bg-muted p-3">
+              <Link
+                href="/configuracoes"
+                aria-label="Abrir configurações do usuário"
+                title="Configurações do usuário"
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <UserAvatar user={user} className="size-12 border-2 border-[#a18ba8]" />
+              </Link>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{user.name}</p>
                 <p className="truncate text-xs text-muted-foreground">{user.email}</p>
