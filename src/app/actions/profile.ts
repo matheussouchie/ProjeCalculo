@@ -31,9 +31,11 @@ export async function updateProfileSettingsAction(
   });
   const password = String(formData.get("password") ?? "");
   const confirmation = String(formData.get("confirmation") ?? "");
+  const avatar = validateAvatarFile(formData.get("avatar"));
 
   if (!profile.success) return { ok: false, message: profile.error.issues[0]?.message };
   if (!email.success) return { ok: false, message: email.error.issues[0]?.message };
+  if (avatar.error) return { ok: false, message: avatar.error };
 
   if (password || confirmation) {
     const parsedPassword = passwordSettingsSchema.safeParse({ password, confirmation });
@@ -63,12 +65,31 @@ export async function updateProfileSettingsAction(
       return { ok: false, message: "Não foi possível atualizar os dados de acesso." };
   }
 
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("avatar_path")
+    .eq("id", user.id)
+    .maybeSingle();
+  let avatarPath = currentProfile?.avatar_path ?? null;
+
+  if (avatar.file) {
+    const uploadedAvatar = await uploadUserAvatar(supabase, user.id, avatar.file);
+    if (uploadedAvatar.error || !uploadedAvatar.path) {
+      return { ok: false, message: "Não foi possível enviar a imagem agora." };
+    }
+    avatarPath = uploadedAvatar.path;
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({ name: profile.data.name })
+    .update({ name: profile.data.name, avatar_path: avatarPath })
     .eq("id", user.id);
-  if (error)
+  if (error) {
+    if (avatar.file && avatarPath !== currentProfile?.avatar_path) {
+      await removeUserAvatar(supabase, avatarPath);
+    }
     return { ok: false, message: "Não foi possível atualizar o perfil agora." };
+  }
 
   revalidatePath("/configuracoes");
   revalidatePath("/dashboard");
@@ -77,11 +98,17 @@ export async function updateProfileSettingsAction(
   revalidatePath("/calcular-prazo");
   revalidatePath("/registrar-projeto-concluido");
 
+  if (avatar.file && currentProfile?.avatar_path) {
+    await removeUserAvatar(supabase, currentProfile.avatar_path);
+  }
+
   return {
     ok: true,
-    message: authUpdates.email
-      ? "Alterações salvas. Confirme o novo e-mail pela mensagem enviada."
-      : "Alterações salvas com sucesso.",
+    message: avatar.file
+      ? "Foto e alterações salvas com sucesso."
+      : authUpdates.email
+        ? "Alterações salvas. Confirme o novo e-mail pela mensagem enviada."
+        : "Alterações salvas com sucesso.",
   };
 }
 
