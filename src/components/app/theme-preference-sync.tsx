@@ -13,7 +13,11 @@ export function ThemePreferenceSync({
   const { setTheme } = useTheme();
 
   useEffect(() => {
-    setTheme(initialTheme);
+    const storedTheme = window.localStorage.getItem("theme");
+
+    if (storedTheme !== "light" && storedTheme !== "dark") {
+      setTheme(initialTheme);
+    }
   }, [initialTheme, setTheme]);
 
   return null;

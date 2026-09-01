@@ -1,23 +1,33 @@
 "use client";
 
-import { useTransition } from "react";
+import { useRef } from "react";
 import { useTheme } from "next-themes";
 
-import { updateThemePreferenceAction } from "@/app/actions/preferences";
 import { Button } from "@/components/ui/button";
 import type { ThemePreference } from "@/services/user-preferences/user-preferences.queries";
 
 export function ThemeToggle({ initialTheme }: { initialTheme: ThemePreference }) {
   const { setTheme, resolvedTheme } = useTheme();
-  const [, startTransition] = useTransition();
+  const persistenceQueue = useRef(Promise.resolve());
   const isDark = (resolvedTheme ?? initialTheme) === "dark";
 
   function toggleTheme() {
     const theme: ThemePreference = isDark ? "light" : "dark";
+
     setTheme(theme);
-    startTransition(async () => {
-      await updateThemePreferenceAction(theme);
-    });
+
+    persistenceQueue.current = persistenceQueue.current
+      .catch(() => undefined)
+      .then(async () => {
+        await fetch("/api/preferences/theme", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ theme }),
+          keepalive: true,
+        });
+      });
   }
 
   return (
