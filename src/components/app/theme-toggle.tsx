@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useTransition } from "react";
+import { useTransition } from "react";
 import { useTheme } from "next-themes";
 
 import { updateThemePreferenceAction } from "@/app/actions/preferences";
@@ -10,12 +9,8 @@ import type { ThemePreference } from "@/services/user-preferences/user-preferenc
 
 export function ThemeToggle({ initialTheme }: { initialTheme: ThemePreference }) {
   const { setTheme, resolvedTheme } = useTheme();
-  const [isPending, startTransition] = useTransition();
-  const isDark = resolvedTheme === "dark";
-
-  useEffect(() => {
-    setTheme(initialTheme);
-  }, [initialTheme, setTheme]);
+  const [, startTransition] = useTransition();
+  const isDark = (resolvedTheme ?? initialTheme) === "dark";
 
   function toggleTheme() {
     const theme: ThemePreference = isDark ? "light" : "dark";
@@ -30,25 +25,18 @@ export function ThemeToggle({ initialTheme }: { initialTheme: ThemePreference })
       type="button"
       variant="secondary"
       size="icon"
-      className="relative overflow-hidden border border-[#a18ba8] bg-[#52395e] hover:bg-[#80658c] dark:border-[#53575e] dark:bg-[#f0c4a3] dark:hover:bg-[#e5b08a]"
+      className="relative overflow-hidden border border-[#a18ba8] bg-[#52395e] text-white shadow-none hover:border-[#53575e] hover:bg-[#c5b7c9] hover:text-[#53575e] active:border-[#a18ba8] active:bg-[#80658c] active:text-white dark:border-[#53575e] dark:bg-[#f0c4a3] dark:text-[#53575e] dark:hover:border-[#f5f1f7] dark:hover:bg-[#e8a06d] dark:hover:text-white dark:active:border-[#f5f1f7] dark:active:bg-[#de7c33] dark:active:text-white"
       onClick={toggleTheme}
-      disabled={isPending}
-      aria-label={isDark ? "Ativar tema claro" : "Ativar tema noturno"}
-      title={isDark ? "Tema claro" : "Tema noturno"}
+      aria-label="Alternar tema"
+      title="Alternar tema"
     >
-      <Image
-        src="/icons/figma/theme-light.svg"
-        alt=""
-        width={24}
-        height={24}
-        className="size-6 dark:hidden"
-      />
-      <Image
-        src="/icons/figma/theme-dark.svg"
-        alt=""
-        width={24}
-        height={24}
-        className="hidden size-6 dark:block"
+      <span
+        aria-hidden="true"
+        className="size-6 bg-current [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
+        style={{
+          WebkitMaskImage: "url(/icons/figma/theme-light.svg)",
+          maskImage: "url(/icons/figma/theme-light.svg)",
+        }}
       />
     </Button>
   );

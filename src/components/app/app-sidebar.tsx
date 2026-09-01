@@ -12,11 +12,11 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[245px] shrink-0 bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+    <aside className="sticky top-0 hidden h-dvh w-[245px] shrink-0 bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
       <AppLogo className="h-[120px]" />
 
       <nav
-        className="mt-3 flex flex-col gap-[15px] px-3"
+        className="flex h-[326px] flex-col justify-center gap-[15px]"
         aria-label="Navegação principal"
       >
         {appNavigationItems.map((item) => {
@@ -29,10 +29,8 @@ export function AppSidebar() {
               href={item.href}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex h-[54px] items-center gap-[10px] rounded-md px-5 text-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive &&
-                  "bg-sidebar-accent text-sidebar-accent-foreground shadow-[var(--shadow-card)]",
+                "mx-3 flex h-[54px] items-center gap-[10px] px-5 text-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "hover:text-[#e8a06d] active:text-[#de7c33] dark:hover:text-[#e5b08a] dark:active:text-[#de7c33]",
               )}
             >
               <DesignIcon name={item.icon} />

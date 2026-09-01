@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -55,9 +54,6 @@ export async function updateThemePreferenceAction(theme: "light" | "dark") {
       message: "Não foi possível salvar o tema.",
     };
   }
-
-  revalidatePath("/dashboard");
-  revalidatePath("/configuracoes");
 
   return {
     ok: true,

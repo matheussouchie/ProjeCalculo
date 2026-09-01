@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,13 +13,16 @@ import { Badge } from "@/components/ui/badge";
 import { ActionIcon } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { AnalyticsProject } from "@/services/analytics/dashboard-analytics.service";
 import { roundToOneDecimal } from "@/utils/number";
 
 type ProjectHistoryListProps = {
   projects: AnalyticsProject[];
   title?: string;
+  description?: string;
   showActions?: boolean;
+  appearance?: "default" | "dashboard";
 };
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
@@ -51,12 +54,15 @@ function getPredictedDays(project: AnalyticsProject) {
 export function ProjectHistoryList({
   projects,
   title = "Histórico recente",
+  description,
   showActions = false,
+  appearance = "default",
 }: ProjectHistoryListProps) {
   const router = useRouter();
   const [state, setState] = useState<ProjectActionState>({ ok: false });
   const [deleteTarget, setDeleteTarget] = useState<AnalyticsProject | null>(null);
   const [isPending, startTransition] = useTransition();
+  const isDashboard = appearance === "dashboard";
 
   function duplicateProject(projectId: string) {
     startTransition(async () => {
@@ -74,11 +80,19 @@ export function ProjectHistoryList({
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card
+      className={cn(
+        isDashboard &&
+          "gap-0 border-0 bg-[#f5f1f7] py-5 shadow-[var(--shadow-card)] dark:bg-[#80658c]",
+      )}
+    >
+      <CardHeader className={cn(isDashboard && "gap-5 px-[30px] pb-5")}>
         <CardTitle>{title}</CardTitle>
+        {description ? (
+          <p className="text-sm leading-none text-foreground">{description}</p>
+        ) : null}
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className={cn("space-y-3", isDashboard && "space-y-5 px-[30px]")}>
         {state.message ? (
           <p
             className={
@@ -92,41 +106,79 @@ export function ProjectHistoryList({
         ) : null}
 
         {projects.length === 0 ? (
-          <p className="rounded-lg border border-dashed bg-muted/30 p-6 text-sm text-muted-foreground">
+          <p
+            className={cn(
+              "rounded-lg border border-dashed bg-muted/30 p-6 text-sm text-muted-foreground",
+              isDashboard && "border-0 bg-card text-foreground/70 dark:bg-[#53575e]",
+            )}
+          >
             Nenhum projeto registrado ainda.
           </p>
         ) : (
           projects.map((project) => (
             <article
               key={project.id}
-              className="grid gap-4 rounded-lg border bg-background/60 p-4 transition-colors hover:bg-muted/30 xl:grid-cols-[minmax(0,1fr)_140px_120px_150px_auto] xl:items-center"
+              className={cn(
+                "grid gap-4 rounded-lg border bg-background/60 p-4 transition-colors hover:bg-muted/30 xl:grid-cols-[minmax(0,1fr)_140px_120px_150px_auto] xl:items-center",
+                isDashboard &&
+                  "min-h-[82px] rounded-md border-0 bg-card px-[30px] py-[15px] dark:bg-[#53575e] xl:grid-cols-[minmax(220px,1fr)_125px_125px_135px_122px] xl:items-center",
+              )}
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base">{project.name}</h3>
-                  <Badge variant="secondary">{getProjectStatus(project)}</Badge>
+                  <h3
+                    className={cn("text-base", isDashboard && "text-lg leading-none")}
+                  >
+                    {project.name}
+                  </h3>
+                  {!isDashboard ? (
+                    <Badge variant="secondary">{getProjectStatus(project)}</Badge>
+                  ) : null}
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {formatDate(project.completed_at ?? project.created_at)}
+                <p className="mt-[15px] text-xs leading-none text-muted-foreground dark:text-[#dddade]">
+                  {isDashboard ? "Criado em " : ""}
+                  {formatDate(project.created_at)}
                 </p>
               </div>
 
               <Metric
                 label="Metragem"
-                value={`${roundToOneDecimal(project.total_square_meters)} m²`}
+                value={`${roundToOneDecimal(project.total_square_meters)}m²`}
+                dashboard={isDashboard}
               />
-              <Metric label="Previsto" value={`${getPredictedDays(project)} dias`} />
               <Metric
-                label="Real"
-                value={project.actual_days ? `${project.actual_days} dias` : "--"}
+                label="Previsto"
+                value={`${getPredictedDays(project)} dias`}
+                dashboard={isDashboard}
+              />
+              <Metric
+                label={isDashboard ? "Atualizado em" : "Real"}
+                value={
+                  isDashboard
+                    ? formatDate(project.updated_at)
+                    : project.actual_days
+                      ? `${project.actual_days} dias`
+                      : "--"
+                }
+                dashboard={isDashboard}
               />
 
               {showActions ? (
-                <div className="flex items-center justify-start gap-2 xl:justify-end">
+                <div
+                  className={cn(
+                    "flex items-center justify-start gap-2 xl:justify-end",
+                    isDashboard && "gap-[25px] xl:justify-end",
+                  )}
+                >
                   <Button
                     asChild
-                    variant="outline"
+                    variant={isDashboard ? "ghost" : "outline"}
                     size="icon"
+                    className={cn(
+                      "group",
+                      isDashboard &&
+                        "size-6 rounded-none p-0 shadow-none hover:bg-transparent",
+                    )}
                     title="Editar projeto"
                     aria-label="Editar projeto"
                   >
@@ -136,8 +188,13 @@ export function ProjectHistoryList({
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant={isDashboard ? "ghost" : "outline"}
                     size="icon"
+                    className={cn(
+                      "group",
+                      isDashboard &&
+                        "size-6 rounded-none p-0 shadow-none hover:bg-transparent",
+                    )}
                     title="Duplicar projeto"
                     aria-label="Duplicar projeto"
                     onClick={() => duplicateProject(project.id)}
@@ -147,8 +204,13 @@ export function ProjectHistoryList({
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant={isDashboard ? "ghost" : "outline"}
                     size="icon"
+                    className={cn(
+                      "group",
+                      isDashboard &&
+                        "size-6 rounded-none p-0 shadow-none hover:bg-transparent",
+                    )}
                     title="Excluir projeto"
                     aria-label="Excluir projeto"
                     onClick={() => setDeleteTarget(project)}
@@ -199,11 +261,33 @@ export function ProjectHistoryList({
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function Metric({
+  label,
+  value,
+  dashboard = false,
+}: {
+  label: string;
+  value: string;
+  dashboard?: boolean;
+}) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-sans text-sm font-semibold">{value}</p>
+      <p
+        className={cn(
+          "text-xs text-muted-foreground",
+          dashboard && "text-lg font-semibold leading-none text-foreground",
+        )}
+      >
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1 font-sans text-sm font-semibold",
+          dashboard && "mt-[15px] text-xs font-normal leading-none",
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }

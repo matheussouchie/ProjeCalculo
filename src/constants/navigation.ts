@@ -16,13 +16,16 @@ export const appNavigationItems: AppNavigationItem[] = [
   { title: "Calcular Prazo", href: "/calcular-prazo", icon: "calculator" },
   { title: "Ambientes", href: "/ambientes", icon: "rooms" },
   { title: "Projetos", href: "/projetos", icon: "projects" },
-  { title: "Estatísticas", href: "/estatisticas", icon: "dashboard" },
   { title: "Configurações", href: "/configuracoes", icon: "settings" },
 ];
 
 export function getNavigationTitle(pathname: string) {
   if (pathname.startsWith("/registrar-projeto-concluido")) {
     return "Registrar Projeto Concluído";
+  }
+
+  if (pathname.startsWith("/estatisticas")) {
+    return "Estatísticas";
   }
 
   return (
