@@ -90,10 +90,10 @@ export function ProfileSettingsForm({
         <div className="flex min-h-[150px] flex-col items-center justify-center">
           <button
             type="button"
-            onDoubleClick={() => avatarInputRef.current?.click()}
+            onClick={() => avatarInputRef.current?.click()}
             disabled={isPending}
-            aria-label="Clique duas vezes para alterar a foto do perfil"
-            title="Clique duas vezes para alterar a foto"
+            aria-label="Alterar a foto do perfil"
+            title="Clique para alterar a foto"
             className="rounded-full outline-none transition-opacity hover:opacity-90 focus-visible:ring-[3px] focus-visible:ring-ring/40"
           >
             <UserAvatar
