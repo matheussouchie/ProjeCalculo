@@ -84,6 +84,7 @@ export type Database = {
           predicted_days: number;
           actual_days: number | null;
           complexity_score: number;
+          calculation_mode: "rooms" | "total_area";
           created_at: string;
           updated_at: string;
           completed_at: string | null;
@@ -97,6 +98,7 @@ export type Database = {
           predicted_days: number;
           actual_days?: number | null;
           complexity_score?: number;
+          calculation_mode?: "rooms" | "total_area";
           created_at?: string;
           updated_at?: string;
           completed_at?: string | null;
@@ -108,6 +110,7 @@ export type Database = {
           predicted_days?: number;
           actual_days?: number | null;
           complexity_score?: number;
+          calculation_mode?: "rooms" | "total_area";
           updated_at?: string;
           completed_at?: string | null;
         };

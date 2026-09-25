@@ -21,7 +21,16 @@ export const calculatorRoomSchema = z.object({
 export const deadlineCalculatorSchema = z.object({
   projectId: z.string().uuid().optional(),
   projectName: z.string().trim().max(80).optional(),
+  calculationMode: z.enum(["rooms", "total_area"]),
+  totalSquareMeters: squareMetersSchema.optional(),
   rooms: z.array(calculatorRoomSchema),
+}).superRefine((values, context) => {
+  if (values.calculationMode === "rooms" && values.rooms.length === 0) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["rooms"], message: "Adicione ao menos um ambiente." });
+  }
+  if (values.calculationMode === "total_area" && !(values.totalSquareMeters && values.totalSquareMeters > 0)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["totalSquareMeters"], message: "Informe uma metragem total maior que zero." });
+  }
 });
 
 export type DeadlineCalculatorValues = z.infer<typeof deadlineCalculatorSchema>;

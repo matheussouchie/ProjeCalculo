@@ -20,6 +20,7 @@ export type SavedEstimate = {
   totalSquareMeters: number;
   predictedDays: number;
   complexityScore: number;
+  calculationMode: "rooms" | "total_area";
   createdAt: string;
   updatedAt: string;
   rooms: SavedEstimateRoom[];
@@ -32,6 +33,7 @@ type ProjectWithRooms = Pick<
   | "total_square_meters"
   | "predicted_days"
   | "complexity_score"
+  | "calculation_mode"
   | "created_at"
   | "updated_at"
 > & {
@@ -45,6 +47,7 @@ export function mapSavedEstimate(project: ProjectWithRooms): SavedEstimate {
     totalSquareMeters: project.total_square_meters,
     predictedDays: project.predicted_days,
     complexityScore: project.complexity_score,
+    calculationMode: project.calculation_mode ?? (project.project_rooms.length ? "rooms" : "total_area"),
     createdAt: project.created_at,
     updatedAt: project.updated_at,
     rooms: project.project_rooms.map((room) => ({
@@ -63,6 +66,8 @@ export function mapEstimateToCalculatorValues(
   return {
     projectId: estimate.id,
     projectName: estimate.name,
+    calculationMode: estimate.calculationMode,
+    totalSquareMeters: estimate.totalSquareMeters,
     rooms: estimate.rooms.map((room) => ({
       id: room.id,
       type: room.type,

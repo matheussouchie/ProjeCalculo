@@ -21,6 +21,8 @@ export type ForecastRoom = AlgorithmRoom & {
 
 export type ForecastInput = {
   rooms: AlgorithmRoom[];
+  totalSquareMeters?: number;
+  predictionMode?: "rooms" | "total_area";
   averageProductivity?: number;
   historicalSamples?: HistoricalProductivitySample[];
   fallbackProductivity: number;

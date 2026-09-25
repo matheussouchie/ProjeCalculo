@@ -518,10 +518,10 @@ export async function saveEstimateAction(
 ): Promise<SavedEstimateActionState> {
   const parsed = deadlineCalculatorSchema.safeParse(values);
 
-  if (!parsed.success || parsed.data.rooms.length === 0) {
+  if (!parsed.success) {
     return {
       ok: false,
-      message: parsed.error?.issues[0]?.message ?? "Adicione ambientes para salvar.",
+      message: parsed.error?.issues[0]?.message ?? "Revise os dados da estimativa.",
     };
   }
 
@@ -554,7 +554,7 @@ export async function saveEstimateAction(
   const userRoomsById = await getUserRoomsById(supabase, user.id);
   const estimateInput = buildEstimateInput(parsed.data, projectName, userRoomsById);
 
-  if (estimateInput.environments.length === 0) {
+  if (parsed.data.calculationMode === "rooms" && estimateInput.environments.length === 0) {
     return {
       ok: false,
       message: "Informe a metragem de ao menos um ambiente.",
@@ -571,6 +571,8 @@ export async function saveEstimateAction(
     environments: estimateInput.environments,
     productivity: mapStatisticsToProductivityProfile(statisticsResponse.data),
     historicalSamples: await getHistoricalSamples(supabase, user.id),
+    predictionMode: parsed.data.calculationMode,
+    totalSquareMeters: parsed.data.totalSquareMeters,
   });
 
   const projectPayload = {
@@ -578,6 +580,7 @@ export async function saveEstimateAction(
     total_square_meters: estimate.totalSquareMeters,
     predicted_days: estimate.recommendedDays,
     complexity_score: estimate.weightedSquareMeters,
+    calculation_mode: parsed.data.calculationMode,
   };
 
   const projectResponse = parsed.data.projectId
@@ -619,8 +622,7 @@ export async function saveEstimateAction(
     }
   }
 
-  const { error: roomsError } = await supabase.from("project_rooms").insert(
-    estimate.environments.map((environment) => {
+  const roomRows = estimate.environments.map((environment) => {
       const persistence = getRoomPersistenceData(environment, userRoomsById);
 
       return {
@@ -633,8 +635,11 @@ export async function saveEstimateAction(
         weight_used: persistence.weight,
         complexity_points: environment.complexityMultiplier,
       };
-    }),
-  );
+    });
+
+  const roomsError = roomRows.length
+    ? (await supabase.from("project_rooms").insert(roomRows)).error
+    : null;
 
   if (roomsError) {
     return {
@@ -729,7 +734,7 @@ export async function duplicateEstimateAction(
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .select(
-      "name,total_square_meters,predicted_days,complexity_score,project_rooms(user_room_id,room_type,room_label,quantity,square_meters,weight_used,complexity_points)",
+      "name,total_square_meters,predicted_days,complexity_score,calculation_mode,project_rooms(user_room_id,room_type,room_label,quantity,square_meters,weight_used,complexity_points)",
     )
     .eq("id", projectId)
     .eq("user_id", user.id)
@@ -753,6 +758,7 @@ export async function duplicateEstimateAction(
       total_square_meters: project.total_square_meters,
       predicted_days: project.predicted_days,
       complexity_score: project.complexity_score,
+      calculation_mode: project.calculation_mode,
     })
     .select("id")
     .single();
@@ -764,8 +770,8 @@ export async function duplicateEstimateAction(
     };
   }
 
-  const { error: roomsError } = await supabase.from("project_rooms").insert(
-    project.project_rooms.map((room) => ({
+  const roomsError = project.project_rooms.length
+    ? (await supabase.from("project_rooms").insert(project.project_rooms.map((room) => ({
       project_id: duplicatedProject.id,
       user_room_id: room.user_room_id,
       room_type: room.room_type,
@@ -774,8 +780,8 @@ export async function duplicateEstimateAction(
       square_meters: room.square_meters,
       weight_used: room.weight_used,
       complexity_points: room.complexity_points,
-    })),
-  );
+    })))).error
+    : null;
 
   if (roomsError) {
     return {

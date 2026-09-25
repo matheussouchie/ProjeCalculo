@@ -39,6 +39,8 @@ export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEs
     averageProductivity: input.productivity.averageSquareMetersPerDay,
     historicalSamples: input.historicalSamples,
     fallbackProductivity: INITIAL_PRODUCTIVITY_BASE.averageSquareMetersPerDay,
+    predictionMode: input.predictionMode,
+    totalSquareMeters: input.totalSquareMeters,
   });
 
   const environments: EnvironmentEstimate[] = forecast.rooms.map((room) => {
@@ -74,7 +76,9 @@ export function calculateProjectEstimate(input: ProjectEstimateInput): ProjectEs
       conservative: forecast.conservativeDays,
     },
     environments,
-    insights: buildInsights(environments, forecast.productivityUsed),
+    insights: input.predictionMode === "total_area"
+      ? ["Previsão calculada pela produtividade global do seu histórico.", `Produtividade considerada: ${roundToOneDecimal(forecast.productivityUsed)} m2 por dia.`, "Projetos recentes possuem maior peso e outliers extremos sao suavizados."]
+      : buildInsights(environments, forecast.productivityUsed),
   };
 }
 

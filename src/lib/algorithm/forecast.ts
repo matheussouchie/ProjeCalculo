@@ -55,8 +55,13 @@ export function forecastProjectDays(input: ForecastInput): ForecastResult {
     };
   });
 
-  const totalSquareMeters = rooms.reduce((total, room) => total + room.squareMeters, 0);
-  const complexityTotal = rooms.reduce(
+  const roomSquareMeters = rooms.reduce((total, room) => total + room.squareMeters, 0);
+  const totalSquareMeters = input.predictionMode === "total_area"
+    ? input.totalSquareMeters ?? 0
+    : roomSquareMeters;
+  const complexityTotal = input.predictionMode === "total_area"
+    ? totalSquareMeters
+    : rooms.reduce(
     (total, room) => total + room.weightedSquareMeters,
     0,
   );
@@ -75,6 +80,6 @@ export function forecastProjectDays(input: ForecastInput): ForecastResult {
     predictedDays,
     optimisticDays: displayDays(predictedDays * (1 - marginRatio * 0.65)),
     conservativeDays: displayDays(predictedDays * (1 + marginRatio)),
-    confidence: getConfidence(rooms.length, historicalSampleCount),
+    confidence: getConfidence(input.predictionMode === "total_area" ? 0 : rooms.length, historicalSampleCount),
   };
 }

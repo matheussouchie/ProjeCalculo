@@ -23,6 +23,8 @@ export type ProductivityProfile = {
 export type ProjectEstimateInput = {
   projectName: string;
   environments: ProjectEnvironment[];
+  predictionMode?: "rooms" | "total_area";
+  totalSquareMeters?: number;
   productivity: ProductivityProfile;
   historicalSamples?: {
     totalSquareMeters: number;

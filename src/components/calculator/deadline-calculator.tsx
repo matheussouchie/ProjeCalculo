@@ -50,6 +50,8 @@ type DeadlineCalculatorProps = {
 
 const defaultValues: DeadlineCalculatorValues = {
   projectName: "",
+  calculationMode: "rooms",
+  totalSquareMeters: undefined,
   rooms: [],
 };
 
@@ -85,6 +87,8 @@ export function DeadlineCalculator({
     name: "projectName",
   });
   const watchedRoomsValue = useWatch({ control: form.control, name: "rooms" });
+  const calculationMode = useWatch({ control: form.control, name: "calculationMode" }) ?? "rooms";
+  const watchedTotalSquareMeters = useWatch({ control: form.control, name: "totalSquareMeters" });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
   const watchedValues = useWatch({ control: form.control });
   const autosaveValues = useMemo(
@@ -92,6 +96,8 @@ export function DeadlineCalculator({
       ({
         projectId: watchedValues.projectId,
         projectName: watchedValues.projectName ?? "",
+        calculationMode: watchedValues.calculationMode ?? "rooms",
+        totalSquareMeters: watchedValues.totalSquareMeters,
         rooms: (watchedValues.rooms ?? []) as DeadlineCalculatorValues["rooms"],
       }) satisfies DeadlineCalculatorValues,
     [watchedValues.projectId, watchedValues.projectName, watchedValues.rooms],
@@ -116,7 +122,7 @@ export function DeadlineCalculator({
     0,
   );
 
-  const totalInputValue = draftTotalSquareMeters ?? currentTotalSquareMeters.toFixed(4);
+  const totalInputValue = draftTotalSquareMeters ?? (calculationMode === "total_area" ? Number(watchedTotalSquareMeters ?? 0).toFixed(4) : currentTotalSquareMeters.toFixed(4));
 
   const estimateInput = useMemo(() => {
     const environments = watchedRooms
@@ -135,17 +141,22 @@ export function DeadlineCalculator({
       projectName: watchedProjectName?.trim() || "Estimativa rápida",
       productivity,
       historicalSamples,
+      predictionMode: calculationMode,
+      totalSquareMeters: Number(watchedTotalSquareMeters ?? 0),
       environments,
     };
-  }, [historicalSamples, productivity, roomOptions, watchedProjectName, watchedRooms]);
+  }, [calculationMode, historicalSamples, productivity, roomOptions, watchedProjectName, watchedRooms, watchedTotalSquareMeters]);
 
   const estimate = useMemo(() => {
-    if (estimateInput.environments.length === 0) {
+    if (calculationMode === "rooms" && estimateInput.environments.length === 0) {
+      return null;
+    }
+    if (calculationMode === "total_area" && estimateInput.totalSquareMeters <= 0) {
       return null;
     }
 
     return calculateProjectEstimate(estimateInput);
-  }, [estimateInput]);
+  }, [calculationMode, estimateInput]);
 
   const totalComplexity = estimate?.weightedSquareMeters ?? 0;
   const totalRooms = watchedRooms.length;
@@ -178,6 +189,13 @@ export function DeadlineCalculator({
 
     setDraftTotalSquareMeters(null);
 
+    if (calculationMode === "total_area") {
+      if (Number.isFinite(targetTotal) && targetTotal > 0) {
+        form.setValue("totalSquareMeters", targetTotal, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+      }
+      setShowResult(false);
+      return;
+    }
     if (
       !Number.isFinite(targetTotal) ||
       targetTotal <= 0 ||
@@ -228,6 +246,13 @@ export function DeadlineCalculator({
     setShowSaveDialog(false);
     setSaveState({ ok: false });
     calculatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function selectCalculationMode(mode: "rooms" | "total_area") {
+    form.setValue("calculationMode", mode, { shouldDirty: true, shouldValidate: true });
+    setDraftTotalSquareMeters(null);
+    setShowResult(false);
+    setSaveState({ ok: false });
   }
 
   return (
@@ -284,13 +309,23 @@ export function DeadlineCalculator({
             </CardContent>
           </Card>
 
+          <div className="inline-flex rounded-lg border bg-muted/40 p-1" role="tablist" aria-label="Modo de cálculo">
+            <Button type="button" size="sm" variant={calculationMode === "rooms" ? "default" : "ghost"} onClick={() => selectCalculationMode("rooms")}>Por ambientes</Button>
+            <Button type="button" size="sm" variant={calculationMode === "total_area" ? "default" : "ghost"} onClick={() => selectCalculationMode("total_area")}>Somente metragem</Button>
+          </div>
+
           <SummaryCards
             totalSquareMeters={estimate?.totalSquareMeters ?? 0}
             complexity={totalComplexity}
             estimatedDays={estimate?.recommendedDays ?? 0}
           />
 
-          <Card>
+          {calculationMode === "total_area" ? (
+            <Card>
+              <CardHeader><CardTitle>Metragem total</CardTitle><p className="text-sm text-muted-foreground">Informe apenas a metragem total para obter uma estimativa rápida.</p></CardHeader>
+              <CardContent><Label htmlFor="total-area">Metragem total</Label><Input id="total-area" className="mt-2" type="number" min={0} step="0.0001" value={totalInputValue} onChange={(event) => setDraftTotalSquareMeters(event.target.value)} onBlur={applyTotalSquareMeters} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyTotalSquareMeters(); } }} /></CardContent>
+            </Card>
+          ) : <Card>
             <CardHeader>
               <CardTitle>Ambientes</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -431,7 +466,7 @@ export function DeadlineCalculator({
                 )}
               </AnimatePresence>
             </CardContent>
-          </Card>
+          </Card>}
         </div>
 
         <aside className="xl:sticky xl:top-28 xl:self-start">
@@ -443,7 +478,7 @@ export function DeadlineCalculator({
               </p>
             </CardHeader>
             <CardContent className="space-y-5">
-              <SideMetric label="Ambientes adicionados" value={String(totalRooms)} />
+              {calculationMode === "rooms" ? <SideMetric label="Ambientes adicionados" value={String(totalRooms)} /> : null}
               <div className="space-y-2 border-b pb-3">
                 <Label htmlFor="calculator-total-square-meters">Metragem total</Label>
                 <div className="flex gap-2">
@@ -453,9 +488,8 @@ export function DeadlineCalculator({
                     min={0}
                     step="0.0001"
                     value={totalInputValue}
-                    onFocus={() =>
-                      setDraftTotalSquareMeters(currentTotalSquareMeters.toFixed(4))
-                    }
+                    readOnly={calculationMode === "total_area"}
+                    onFocus={() => setDraftTotalSquareMeters(calculationMode === "total_area" ? Number(watchedTotalSquareMeters ?? 0).toFixed(4) : currentTotalSquareMeters.toFixed(4))}
                     onChange={(event) => {
                       setDraftTotalSquareMeters(event.target.value);
                     }}
@@ -467,23 +501,23 @@ export function DeadlineCalculator({
                       }
                     }}
                   />
-                  <Button
+                  {calculationMode === "rooms" ? <Button
                     type="button"
                     variant="secondary"
                     onClick={applyTotalSquareMeters}
                     disabled={watchedRooms.length === 0}
                   >
                     Ajustar
-                  </Button>
+                  </Button> : null}
                 </div>
-                <p className="text-xs leading-5 text-muted-foreground">
+                {calculationMode === "rooms" ? <p className="text-xs leading-5 text-muted-foreground">
                   Editar o total ajusta proporcionalmente as metragens individuais.
-                </p>
+                </p> : null}
               </div>
-              <SideMetric
+              {calculationMode === "rooms" ? <SideMetric
                 label="Complexidade total"
                 value={totalComplexity ? totalComplexity.toFixed(4) : "--"}
-              />
+              /> : null}
               <SideMetric
                 label="Produtividade atual"
                 value={`${productivity.averageSquareMetersPerDay} m²/dia`}
