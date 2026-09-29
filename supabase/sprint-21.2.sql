@@ -1,0 +1,34 @@
+-- Sprint 21.2: habilita a persistência de estimativas por metragem total.
+-- Execute manualmente no Supabase SQL Editor do projeto ProjeCalculo.
+-- Este arquivo é idempotente e não cria nem altera registros em project_rooms.
+
+begin;
+
+alter table public.projects
+  add column if not exists calculation_mode text;
+
+update public.projects project
+set calculation_mode = case
+  when exists (
+    select 1
+    from public.project_rooms room
+    where room.project_id = project.id
+  ) then 'rooms'
+  else 'total_area'
+end
+where calculation_mode is null;
+
+alter table public.projects
+  alter column calculation_mode set default 'rooms';
+
+alter table public.projects
+  alter column calculation_mode set not null;
+
+alter table public.projects
+  drop constraint if exists projects_calculation_mode_check;
+
+alter table public.projects
+  add constraint projects_calculation_mode_check
+  check (calculation_mode in ('rooms', 'total_area'));
+
+commit;
