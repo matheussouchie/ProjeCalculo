@@ -40,6 +40,16 @@ export type ProjectActionState = {
   message?: string;
 };
 
+function logEstimatePersistenceError(
+  stage: string,
+  error: unknown,
+  payload?: Record<string, unknown>,
+) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error("Estimate persistence failed", { stage, error, payload });
+  }
+}
+
 async function getHistoricalSamples(
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
   userId: string,
@@ -602,6 +612,7 @@ export async function saveEstimateAction(
         .single();
 
   if (projectResponse.error) {
+    logEstimatePersistenceError("project upsert", projectResponse.error, projectPayload);
     return {
       ok: false,
       message: notificationMessages.saveError,
@@ -615,6 +626,9 @@ export async function saveEstimateAction(
       .eq("project_id", parsed.data.projectId);
 
     if (deleteRoomsError) {
+      logEstimatePersistenceError("project rooms deletion", deleteRoomsError, {
+        projectId: parsed.data.projectId,
+      });
       return {
         ok: false,
         message: notificationMessages.saveError,
@@ -642,6 +656,11 @@ export async function saveEstimateAction(
     : null;
 
   if (roomsError) {
+    logEstimatePersistenceError("project rooms insertion", roomsError, {
+      calculationMode: parsed.data.calculationMode,
+      projectId: projectResponse.data.id,
+      roomCount: roomRows.length,
+    });
     return {
       ok: false,
       message: notificationMessages.saveError,
