@@ -13,6 +13,7 @@ type ProjectWithRooms = Pick<
   | "predicted_days"
   | "actual_days"
   | "complexity_score"
+  | "calculation_mode"
   | "created_at"
   | "updated_at"
   | "completed_at"
@@ -28,6 +29,8 @@ export function mapProjectToCompletedProjectValues(
     predictionId: project.prediction_id ?? "",
     name: project.name,
     actualDays: project.actual_days ?? 1,
+    calculationMode: project.calculation_mode,
+    totalSquareMeters: project.total_square_meters,
     rooms: project.project_rooms.map((room) => ({
       id: room.id,
       type: room.room_type,
@@ -42,6 +45,8 @@ export function mapProjectToCompletedProjectValues(
 export function mapEstimateToCompletedProjectValues(estimate: {
   id: string;
   name: string;
+  calculationMode: "rooms" | "total_area";
+  totalSquareMeters: number;
   rooms: {
     id: string;
     type: string;
@@ -55,6 +60,8 @@ export function mapEstimateToCompletedProjectValues(estimate: {
     predictionId: estimate.id,
     name: estimate.name,
     actualDays: 1,
+    calculationMode: estimate.calculationMode,
+    totalSquareMeters: estimate.totalSquareMeters,
     rooms: estimate.rooms.map((room) => ({
       id: room.id,
       type: room.type,

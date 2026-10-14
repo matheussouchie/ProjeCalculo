@@ -28,7 +28,16 @@ export const completedProjectSchema = z.object({
     .int("Use dias corridos inteiros.")
     .min(1, "Informe pelo menos 1 dia.")
     .max(365, "Revise os dias informados."),
-  rooms: z.array(completedProjectRoomSchema).min(1, "Adicione ao menos um ambiente."),
+  calculationMode: z.enum(["rooms", "total_area"]),
+  totalSquareMeters: z.coerce.number<number>().positive().optional(),
+  rooms: z.array(completedProjectRoomSchema),
+}).superRefine((values, context) => {
+  if (values.calculationMode === "rooms" && values.rooms.length === 0) {
+    context.addIssue({ code: "custom", path: ["rooms"], message: "Adicione ao menos um ambiente." });
+  }
+  if (values.calculationMode === "total_area" && !values.totalSquareMeters) {
+    context.addIssue({ code: "custom", path: ["totalSquareMeters"], message: "Informe a metragem total." });
+  }
 });
 
 export type CompletedProjectValues = z.infer<typeof completedProjectSchema>;

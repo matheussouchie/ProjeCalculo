@@ -346,11 +346,15 @@ export async function registerCompletedProjectAction(
 
   const projectId = parsed.data.projectId || undefined;
   const predictionId = parsed.data.predictionId || undefined;
-  const totalSquareMeters = parsed.data.rooms.reduce(
+  const totalSquareMeters = parsed.data.calculationMode === "total_area"
+    ? parsed.data.totalSquareMeters ?? 0
+    : parsed.data.rooms.reduce(
     (total, room) => total + room.squareMeters,
     0,
   );
-  const complexityScore = parsed.data.rooms.reduce((total, room) => {
+  const complexityScore = parsed.data.calculationMode === "total_area"
+    ? totalSquareMeters
+    : parsed.data.rooms.reduce((total, room) => {
     const metrics = getPredictionRoomMetrics(room.type, room.complexityWeight);
 
     return total + room.squareMeters * metrics.weight;
@@ -380,6 +384,8 @@ export async function registerCompletedProjectAction(
     })),
     productivity: mapStatisticsToProductivityProfile(statisticsResponse.data),
     historicalSamples: await getHistoricalSamples(supabase, user.id),
+    predictionMode: parsed.data.calculationMode,
+    totalSquareMeters,
   }).recommendedDays;
   const predictedDays =
     linkedPredictionDays ?? existingProject?.predicted_days ?? fallbackPredictedDays;
@@ -401,6 +407,7 @@ export async function registerCompletedProjectAction(
         predicted_days: predictedDays,
         actual_days: parsed.data.actualDays,
         complexity_score: Number(complexityScore.toFixed(4)),
+        calculation_mode: parsed.data.calculationMode,
         completed_at: existingProject.completed_at,
       })
       .eq("id", projectId)
@@ -425,7 +432,7 @@ export async function registerCompletedProjectAction(
       };
     }
 
-    const { error: insertRoomsError } = await supabase.from("project_rooms").insert(
+    const insertRoomsError = parsed.data.rooms.length ? (await supabase.from("project_rooms").insert(
       parsed.data.rooms.map((room) => {
         const persistence = getRoomPersistenceData(room, userRoomsById);
         const metrics = getPredictionRoomMetrics(room.type, persistence.weight);
@@ -441,7 +448,7 @@ export async function registerCompletedProjectAction(
           complexity_points: metrics.complexityPoints,
         };
       }),
-    );
+    )).error : null;
 
     if (insertRoomsError) {
       return {
@@ -473,6 +480,7 @@ export async function registerCompletedProjectAction(
       predicted_days: predictedDays,
       actual_days: parsed.data.actualDays,
       complexity_score: Number(complexityScore.toFixed(4)),
+      calculation_mode: parsed.data.calculationMode,
       completed_at: new Date().toISOString(),
     })
     .select("id")
@@ -485,7 +493,7 @@ export async function registerCompletedProjectAction(
     };
   }
 
-  const { error: roomsError } = await supabase.from("project_rooms").insert(
+  const roomsError = parsed.data.rooms.length ? (await supabase.from("project_rooms").insert(
     parsed.data.rooms.map((room) => {
       const persistence = getRoomPersistenceData(room, userRoomsById);
       const metrics = getPredictionRoomMetrics(room.type, persistence.weight);
@@ -501,7 +509,7 @@ export async function registerCompletedProjectAction(
         complexity_points: metrics.complexityPoints,
       };
     }),
-  );
+  )).error : null;
 
   if (roomsError) {
     return {

@@ -39,6 +39,8 @@ const defaultValues: CompletedProjectValues = {
   predictionId: "",
   name: "",
   actualDays: 1,
+  calculationMode: "rooms",
+  totalSquareMeters: undefined,
   rooms: [],
 };
 
@@ -84,6 +86,8 @@ export function RegisterCompletedProjectForm({
     control: form.control,
     name: "predictionId",
   });
+  const watchedCalculationMode = useWatch({ control: form.control, name: "calculationMode" });
+  const watchedTotalSquareMeters = useWatch({ control: form.control, name: "totalSquareMeters" });
   const watchedRooms = useMemo(() => watchedRoomsValue ?? [], [watchedRoomsValue]);
   const watchedValues = useWatch({ control: form.control });
   const selectedEstimate = useMemo(
@@ -98,6 +102,8 @@ export function RegisterCompletedProjectForm({
         predictionId: watchedValues.predictionId || "",
         name: watchedValues.name ?? "",
         actualDays: watchedValues.actualDays ?? 1,
+        calculationMode: watchedValues.calculationMode ?? "rooms",
+        totalSquareMeters: watchedValues.totalSquareMeters,
         rooms: (watchedValues.rooms ?? []) as CompletedProjectValues["rooms"],
       }) satisfies CompletedProjectValues,
     [
@@ -106,6 +112,8 @@ export function RegisterCompletedProjectForm({
       watchedValues.projectId,
       watchedValues.predictionId,
       watchedValues.rooms,
+      watchedValues.calculationMode,
+      watchedValues.totalSquareMeters,
     ],
   );
   const autosave = useAutosaveDraft({
@@ -172,6 +180,8 @@ export function RegisterCompletedProjectForm({
       shouldValidate: true,
     });
     replace(estimateValues.rooms);
+    form.setValue("calculationMode", estimateValues.calculationMode, { shouldDirty: true });
+    form.setValue("totalSquareMeters", estimateValues.totalSquareMeters, { shouldDirty: true });
 
     if (!form.getValues("name")) {
       form.setValue("name", estimateValues.name, {
@@ -264,6 +274,7 @@ export function RegisterCompletedProjectForm({
           <CardContent className="grid gap-4">
             <input type="hidden" {...form.register("projectId")} />
             <input type="hidden" {...form.register("predictionId")} />
+            <input type="hidden" {...form.register("calculationMode")} />
 
             <div className="space-y-2">
               <Label htmlFor="prediction-id">Estimativa Relacionada</Label>
@@ -327,6 +338,14 @@ export function RegisterCompletedProjectForm({
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
+            {watchedCalculationMode === "total_area" ? (
+              <div className="space-y-2">
+                <Label htmlFor="total-square-meters">Metragem total (m²)</Label>
+                <Input id="total-square-meters" type="number" min={0} step="0.0001" {...form.register("totalSquareMeters")} />
+                <p className="text-xs text-muted-foreground">A metragem foi trazida da estimativa selecionada.</p>
+              </div>
+            ) : null}
+            {watchedCalculationMode !== "total_area" ? <>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {roomOptions.map((option) => (
                 <button
@@ -458,6 +477,7 @@ export function RegisterCompletedProjectForm({
                 {form.formState.errors.rooms.message}
               </p>
             ) : null}
+            </> : null}
           </CardContent>
         </Card>
       </div>
@@ -474,7 +494,7 @@ export function RegisterCompletedProjectForm({
             <SummaryLine label="Ambientes" value={String(watchedRooms.length)} />
             <SummaryLine
               label="Metragem total"
-              value={`${totalSquareMeters.toFixed(4)} m²`}
+              value={`${(watchedCalculationMode === "total_area" ? watchedTotalSquareMeters ?? 0 : totalSquareMeters).toFixed(4)} m²`}
             />
             <SummaryLine label="Dias reais" value={`${watchedActualDays || 0} dias`} />
 

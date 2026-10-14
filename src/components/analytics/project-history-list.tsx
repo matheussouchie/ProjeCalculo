@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { CheckCircle2 } from "lucide-react";
 
 import {
   deleteProjectAction,
@@ -49,6 +50,10 @@ function getProjectStatus(project: AnalyticsProject) {
 
 function getPredictedDays(project: AnalyticsProject) {
   return project.prediction?.[0]?.predicted_days ?? project.predicted_days;
+}
+
+function isCompleted(project: AnalyticsProject) {
+  return Boolean(project.actual_days && project.completed_at);
 }
 
 export function ProjectHistoryList({
@@ -116,6 +121,10 @@ export function ProjectHistoryList({
           </p>
         ) : (
           projects.map((project) => (
+            (() => {
+              const completed = isCompleted(project);
+
+              return (
             <article
               key={project.id}
               className={cn(
@@ -132,7 +141,9 @@ export function ProjectHistoryList({
                     {project.name}
                   </h3>
                   {!isDashboard ? (
-                    <Badge variant="secondary">{getProjectStatus(project)}</Badge>
+                    <Badge variant={completed ? "success" : "secondary"}>
+                      {getProjectStatus(project)}
+                    </Badge>
                   ) : null}
                 </div>
                 <p className="mt-[15px] text-xs leading-none text-muted-foreground dark:text-[#dddade]">
@@ -153,13 +164,7 @@ export function ProjectHistoryList({
               />
               <Metric
                 label={isDashboard ? "Atualizado em" : "Real"}
-                value={
-                  isDashboard
-                    ? formatDate(project.updated_at)
-                    : project.actual_days
-                      ? `${project.actual_days} dias`
-                      : "--"
-                }
+                value={isDashboard ? formatDate(project.updated_at) : completed ? `${project.actual_days} dias` : "--"}
                 dashboard={isDashboard}
               />
 
@@ -170,6 +175,14 @@ export function ProjectHistoryList({
                     isDashboard && "gap-[25px] xl:justify-end",
                   )}
                 >
+                  {!completed ? (
+                    <Button asChild size="sm" className="whitespace-nowrap">
+                      <Link href={`/registrar-projeto-concluido?estimateId=${project.id}`}>
+                        <CheckCircle2 aria-hidden="true" />
+                        Concluir
+                      </Link>
+                    </Button>
+                  ) : null}
                   <Button
                     asChild
                     variant={isDashboard ? "ghost" : "outline"}
@@ -182,7 +195,7 @@ export function ProjectHistoryList({
                     title="Editar projeto"
                     aria-label="Editar projeto"
                   >
-                    <Link href={`/registrar-projeto-concluido?projectId=${project.id}`}>
+                    <Link href={`/registrar-projeto-concluido?${completed ? "projectId" : "estimateId"}=${project.id}`}>
                       <ActionIcon name="edit" />
                     </Link>
                   </Button>
@@ -221,6 +234,8 @@ export function ProjectHistoryList({
                 </div>
               ) : null}
             </article>
+              );
+            })()
           ))
         )}
       </CardContent>

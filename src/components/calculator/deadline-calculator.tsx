@@ -320,13 +320,6 @@ export function DeadlineCalculator({
             </CardContent>
           </Card>
 
-          <SummaryCards
-            totalSquareMeters={estimate?.totalSquareMeters ?? 0}
-            complexity={totalComplexity}
-            estimatedDays={estimate?.recommendedDays ?? 0}
-            showComplexity={calculationMode === "rooms"}
-          />
-
           {calculationMode === "total_area" ? (
             <Card>
               <CardHeader><CardTitle>Metragem total do projeto</CardTitle><p className="text-sm text-muted-foreground">Informe apenas a metragem total para obter uma estimativa rápida.</p></CardHeader>
@@ -474,6 +467,13 @@ export function DeadlineCalculator({
               </AnimatePresence>
             </CardContent>
           </Card>}
+
+          <SummaryCards
+            totalSquareMeters={estimate?.totalSquareMeters ?? 0}
+            complexity={totalComplexity}
+            estimatedDays={estimate?.recommendedDays ?? 0}
+            showComplexity={calculationMode === "rooms"}
+          />
         </div>
 
         <aside className="xl:sticky xl:top-28 xl:self-start">

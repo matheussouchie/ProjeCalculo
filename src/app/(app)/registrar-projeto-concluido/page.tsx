@@ -1,8 +1,12 @@
 ﻿import { RegisterCompletedProjectForm } from "@/components/completed-project/register-completed-project-form";
 import type { CompletedProjectValues } from "@/lib/completed-project-schema";
 import { getCurrentUserDraft } from "@/services/drafts/drafts.queries";
-import { getCurrentUserSavedEstimates } from "@/services/estimates/saved-estimates.queries";
+import {
+  getCurrentUserSavedEstimateById,
+  getCurrentUserSavedEstimates,
+} from "@/services/estimates/saved-estimates.queries";
 import { getCurrentUserProjectForEditing } from "@/services/projects/projects.queries";
+import { mapEstimateToCompletedProjectValues } from "@/services/projects/project-mappers";
 import { getCurrentUserActiveRoomOptions } from "@/services/user-rooms/user-rooms.queries";
 
 type RegisterCompletedProjectPageProps = {
@@ -18,10 +22,18 @@ export default async function RegisterCompletedProjectPage({
   const projectId = Array.isArray(rawProjectId)
     ? rawProjectId[0]?.trim()
     : rawProjectId?.trim();
+  const rawEstimateId = searchParams?.estimateId;
+  const estimateId = Array.isArray(rawEstimateId)
+    ? rawEstimateId[0]?.trim()
+    : rawEstimateId?.trim();
   const initialProject = projectId
     ? await getCurrentUserProjectForEditing(projectId)
-    : null;
-  const draft = projectId
+    : estimateId
+      ? await getCurrentUserSavedEstimateById(estimateId).then((estimate) =>
+          estimate ? mapEstimateToCompletedProjectValues(estimate) : null,
+        )
+      : null;
+  const draft = projectId || estimateId
     ? null
     : await getCurrentUserDraft<CompletedProjectValues>("completed_project");
 
@@ -36,7 +48,7 @@ export default async function RegisterCompletedProjectPage({
       </div>
 
       <RegisterCompletedProjectForm
-        key={initialProject?.projectId ?? projectId ?? "new"}
+        key={initialProject?.projectId ?? initialProject?.predictionId ?? projectId ?? estimateId ?? "new"}
         roomOptions={roomOptions}
         savedEstimates={savedEstimates}
         draft={draft}
