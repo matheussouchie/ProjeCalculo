@@ -10,19 +10,20 @@ import { mapEstimateToCompletedProjectValues } from "@/services/projects/project
 import { getCurrentUserActiveRoomOptions } from "@/services/user-rooms/user-rooms.queries";
 
 type RegisterCompletedProjectPageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function RegisterCompletedProjectPage({
   searchParams,
 }: RegisterCompletedProjectPageProps) {
+  const resolvedSearchParams = await searchParams;
   const roomOptions = await getCurrentUserActiveRoomOptions();
   const savedEstimates = await getCurrentUserSavedEstimates();
-  const rawProjectId = searchParams?.projectId;
+  const rawProjectId = resolvedSearchParams?.projectId;
   const projectId = Array.isArray(rawProjectId)
     ? rawProjectId[0]?.trim()
     : rawProjectId?.trim();
-  const rawEstimateId = searchParams?.estimateId;
+  const rawEstimateId = resolvedSearchParams?.estimateId;
   const estimateId = Array.isArray(rawEstimateId)
     ? rawEstimateId[0]?.trim()
     : rawEstimateId?.trim();
